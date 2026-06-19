@@ -74,7 +74,7 @@ export default function LoginPage() {
             {/* Logo area */}
             <div className="mb-10 flex flex-col items-start">
               <div className="flex items-center gap-1 font-bold text-2xl tracking-wider">
-                <span className="text-[#4ade80]">GREENEABLE</span>
+                <span className="text-[#4ade80]">ELink</span>
                 <span className="text-xs align-top super text-[#4ade80]">&reg;</span>
               </div>
               <div className="text-orange-500 font-bold tracking-widest text-sm pl-16 -mt-1">
@@ -83,7 +83,7 @@ export default function LoginPage() {
             </div>
 
             <h1 className="text-[2.5rem] leading-tight font-extrabold text-white mb-4">
-              Greeneable Solar
+              ELink Solar
             </h1>
             <p className="text-gray-300 text-sm mb-12 max-w-sm leading-relaxed">
               Complete Solar Business Management Platform for the Modern Era
@@ -247,4 +247,4 @@ export default function LoginPage() {
       </div>
     </div>
   );
-}
+}
