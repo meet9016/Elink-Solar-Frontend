@@ -222,7 +222,7 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 h-screen bg-[#d87612] text-white shadow-2xl transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 z-40 h-screen bg-gradient-to-b from-[#4b6cb7] via-[#7b558f] to-[#a63c71] text-white shadow-2xl transition-all duration-300 ease-in-out ${
           isOpen 
             ? 'w-64 translate-x-0' 
             : 'w-64 -translate-x-full md:w-20 md:translate-x-0'
@@ -317,12 +317,12 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
                         onClick={() => handleNavigation(item.path)}
                         className={`flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 group ${
                           isItemActive
-                            ? 'bg-[#f4f7fb] text-green-600 shadow-md'
+                            ? 'bg-white/20 text-white shadow-md'
                             : 'text-white/80 hover:bg-white/10 hover:text-white'
                         }`}
                       >
                         <Icon className={`h-5 w-5 flex-shrink-0 transition-transform group-hover:scale-110 ${
-                          isItemActive ? 'text-green-600' : 'text-white/80'
+                          isItemActive ? 'text-white' : 'text-white/80'
                         }`} />
                         {isOpen && (
                           <span className="text-sm font-medium text-left flex-1 whitespace-nowrap truncate">{item.label}</span>

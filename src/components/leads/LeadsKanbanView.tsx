@@ -266,13 +266,13 @@ export default function LeadsKanbanView({
             html: `
                 <div style="text-align: left; margin-bottom: 10px;">
                     <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 5px;">
-                        <span style="color: #F28522; margin-right: 5px;">✖</span> Remove Reason
+                        <span style="color: #7d558f; margin-right: 5px;">✖</span> Remove Reason
                     </label>
                     <input id="swal-input1" class="swal2-input" placeholder="Enter reason for marking lead as lost" style="width: 100%; box-sizing: border-box; height: 40px; margin: 0; font-size: 14px;">
                 </div>
                 <div style="text-align: left;">
                     <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 5px;">
-                        <span style="color: #F28522; margin-right: 5px;">📅</span> Lost Date
+                        <span style="color: #7d558f; margin-right: 5px;">📅</span> Lost Date
                     </label>
                     <input id="swal-input2" type="date" class="swal2-input" style="width: 100%; box-sizing: border-box; height: 40px; margin: 0; font-size: 14px;">
                 </div>
@@ -281,7 +281,7 @@ export default function LeadsKanbanView({
             showCancelButton: true,
             confirmButtonText: 'Yes, Confirm',
             cancelButtonText: 'Cancel',
-            confirmButtonColor: '#F28522',
+            confirmButtonColor: '#7d558f',
             cancelButtonColor: '#6D7A86',
             preConfirm: () => {
                 const reason = (document.getElementById('swal-input1') as HTMLInputElement).value;
@@ -325,7 +325,7 @@ export default function LeadsKanbanView({
             showCancelButton: true,
             confirmButtonText: 'Yes, Reactivate',
             cancelButtonText: 'Cancel',
-            confirmButtonColor: '#F28522',
+            confirmButtonColor: '#7d558f',
             cancelButtonColor: '#6D7A86',
         });
 
@@ -376,7 +376,7 @@ export default function LeadsKanbanView({
                             onClick={() => handleSubViewChange(v)}
                             className={`flex items-center gap-2 rounded-lg cursor-pointer px-4 py-1.5 text-sm font-medium capitalize transition-colors ${
                                 subView === v
-                                    ? 'border border-[#F28522] text-[#F28522] bg-white'
+                                    ? 'border border-primary text-primary bg-white'
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-transparent'
                             }`}
                         >
@@ -384,7 +384,7 @@ export default function LeadsKanbanView({
                             {count !== null && (
                                 <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
                                     subView === v
-                                        ? 'bg-[#F28522] text-white'
+                                        ? 'bg-primary text-white'
                                         : v === 'lost'
                                             ? 'bg-red-100 text-red-700'
                                             : 'bg-green-100 text-green-700'
