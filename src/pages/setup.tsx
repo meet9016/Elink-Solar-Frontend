@@ -368,7 +368,7 @@ export default function Setup() {
                       type="button"
                       onClick={handleSaveKanbanStatuses}
                       disabled={leadStatuses.length === 0}
-                      className="px-6 cursor-pointer py-2.5 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-6 cursor-pointer py-2.5 rounded-lg bg-secondary text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Save Changes
                     </button>

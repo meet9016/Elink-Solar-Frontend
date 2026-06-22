@@ -257,7 +257,7 @@ export function CategoryContent() {
             <button
               type="submit"
               form="category-form"
-              className="px-6 py-2 rounded-lg bg-[#0F172A] hover:bg-slate-800 text-white font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 rounded-lg bg-secondary hover:bg-blue-700 text-white font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isSubmitting || !formik.isValid}
             >
               {isSubmitting 
