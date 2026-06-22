@@ -75,10 +75,10 @@ export default function LoginPage() {
             {/* Logo & Title area */}
             <div className="mb-12 flex items-center gap-6">
               <div className="shrink-0 bg-white px-5 py-3 rounded-2xl shadow-2xl border border-white/20">
-                <img src={smsLogo.src} alt="ELink Logo" className="h-12 w-auto object-contain mix-blend-darken" />
+                <img src={smsLogo.src} alt="SMS Logo" className="h-12 w-auto object-contain mix-blend-darken" />
               </div>
               <h1 className="text-[2.5rem] leading-tight font-extrabold text-white">
-                Welcome to ELink Solar
+                Welcome to SMS Solar
               </h1>
             </div>
             <p className="text-gray-300 text-sm mb-12 max-w-sm leading-relaxed">
