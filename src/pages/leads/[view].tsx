@@ -80,6 +80,7 @@ export default function LeadsPage() {
     transfer?: boolean;
     convert?: boolean;
   } | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const token = typeof window !== 'undefined' ? getAuthToken() : null;
 
@@ -101,6 +102,8 @@ export default function LeadsPage() {
         const lp = rawPerms.lead || {};
         setLeadPermissions(lp);
         if (!lp.readAll && lp.readOwn) setActiveTab('my');
+        const roleName = (role.roleName || '').toLowerCase();
+        setIsAdmin(roleName === 'admin');
       } catch (error) {
         console.error('Failed to fetch permissions:', error);
         setLeadPermissions(null);
@@ -368,19 +371,21 @@ export default function LeadsPage() {
               )}
             </button>
 
-            {/* Excel Export Button */}
-            <button
-              onClick={handleExport}
-              disabled={exporting}
-              title="Export to Excel"
-              className="flex items-center gap-2 px-3 py-2 rounded-md text-xs md:text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-all cursor-pointer disabled:opacity-60"
-            >
-              <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">{exporting ? '...' : 'Export'}</span>
-            </button>
+            {/* Excel Export Button - Admin only */}
+            {isAdmin && (
+              <button
+                onClick={handleExport}
+                disabled={exporting}
+                title="Export to Excel"
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-xs md:text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-all cursor-pointer disabled:opacity-60"
+              >
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">{exporting ? '...' : 'Export'}</span>
+              </button>
+            )}
 
-            {/* Bulk Import Button */}
-            {canCreate && (
+            {/* Bulk Import Button - Admin only */}
+            {isAdmin && canCreate && (
               <button
                 onClick={() => setShowBulkImport(true)}
                 title="Bulk Import Leads"
