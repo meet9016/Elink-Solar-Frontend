@@ -45,6 +45,12 @@ export default function LeadAddDialog({
   const [quotationOpen, setQuotationOpen] = useState(false);
 
   const [requiredFields, setRequiredFields] = useState<string[]>([]);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  const isSalesExecutive = useMemo(() => {
+    const roleName = (currentUser?.role?.roleName || '').toLowerCase();
+    return roleName === 'sales executive';
+  }, [currentUser]);
 
   useEffect(() => {
     const loadRequiredFields = () => {
@@ -74,7 +80,7 @@ export default function LeadAddDialog({
         .matches(/^\d+$/, 'Only numbers allowed')
         .length(10, 'Mobile number must be exactly 10 digits'),
       email: Yup.string()
-        .email('Invalid email format')
+        .matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Invalid email format')
         .max(100, 'Email must not exceed 100 characters'),
       kwRequirement: Yup.string(),
       discomName: Yup.string(),
@@ -91,10 +97,10 @@ export default function LeadAddDialog({
     if (requiredFields.includes('fullName')) shape.fullName = shape.fullName.required('Full Name is required');
     if (requiredFields.includes('contact')) shape.contact = shape.contact.required('Mobile Number is required');
     if (requiredFields.includes('leadStatus')) shape.leadStatus = Yup.string().required('Please select a stage');
-    if (requiredFields.includes('assignedTo')) shape.assignedTo = Yup.string().required('Please assign a sales executive');
+    if (requiredFields.includes('assignedTo') && !isSalesExecutive) shape.assignedTo = Yup.string().required('Please assign a sales executive');
 
     return Yup.object().shape(shape);
-  }, [requiredFields]);
+  }, [requiredFields, isSalesExecutive]);
 
   const token = getAuthToken;
 
@@ -130,9 +136,9 @@ export default function LeadAddDialog({
           projecttype: values.projecttype,
           address: values.address.trim(),
           locationLink: values.locationLink.trim(),
-          city: values.city,
+          city: isSalesExecutive ? '' : values.city,
           leadStatus: values.leadStatus,
-          assignedTo: values.assignedTo,
+          assignedTo: isSalesExecutive ? (values.assignedTo || currentUser?._id || '') : values.assignedTo,
           isActive: values.isActive,
         };
 
@@ -175,6 +181,17 @@ export default function LeadAddDialog({
       setLoading(true);
       try {
         const headers = { Authorization: `Bearer ${token()}` };
+
+        let currentUserData = currentUser;
+        if (!currentUserData) {
+          try {
+            const userRes = await axios.get(baseUrl.currentStaff, { headers });
+            currentUserData = userRes.data?.data;
+            setCurrentUser(currentUserData);
+          } catch (e) {
+            console.error('Failed to fetch current user:', e);
+          }
+        }
 
         let leadData = null;
         if (mode === 'edit' && initialData?._id) {
@@ -326,22 +343,21 @@ export default function LeadAddDialog({
                     }}
                     onKeyDown={(e) => {
                       // Allow: backspace, delete, tab, escape, enter, arrows, home, end
-                      const allowed = ['Backspace','Delete','Tab','Escape','Enter','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'];
+                      const allowed = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
                       if (allowed.includes(e.key)) return;
                       // Block anything that's not a digit
                       if (!/^\d$/.test(e.key)) e.preventDefault();
                     }}
                     onBlur={formik.handleBlur}
                     placeholder="Enter 10-digit number"
-                    className={`w-full px-3 py-2.5 pr-52 rounded-xl bg-white/90 text-gray-800 text-sm outline-none transition-all duration-200 border-2 ${
-                      formik.touched.contact && formik.errors.contact
+                    className={`w-full px-3 py-2.5 pr-52 rounded-xl bg-white/90 text-gray-800 text-sm outline-none transition-all duration-200 border-2 ${formik.touched.contact && formik.errors.contact
                         ? 'border-red-500 ring-2 ring-red-200'
                         : formik.values.contact.length === 10
                           ? 'border-green-500 ring-2 ring-green-200'
                           : 'border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
-                    }`}
+                      }`}
                   />
-               
+
                 </div>
                 {formik.touched.contact && formik.errors.contact && (
                   <div className="mt-2 flex items-center gap-1.5">
@@ -389,7 +405,7 @@ export default function LeadAddDialog({
                 placeholder="Select Discom Name"
               />
               <FormSelect
-                label="Lead Refrance"
+                label="Lead Reference"
                 name="leadrefrance"
                 value={formik.values.leadrefrance || ''}
                 onChange={(val) => { formik.setFieldValue('leadrefrance', val); }}
@@ -398,38 +414,42 @@ export default function LeadAddDialog({
                   { value: 'like', label: 'Link' },
                   { value: 'facebook', label: 'Facebook' },
                   { value: 'data', label: 'Data' },
+                  { value: 'Call', label: 'Call' },
+                  { value: 'Client Reference Through', label: 'Client Reference Through' }
                 ]}
                 error={getFieldError('leadrefrance')}
-                placeholder="Select Lead Refrance"
+                placeholder="Select Lead Reference"
               />
             </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <FormSelect
-                label="City"
-                name="city"
-                value={formik.values.city || ''}
-                onChange={(val) => {
-                  formik.setFieldValue('city', val);
-                  if (val) {
-                    const selectedUser = staff.find((u: any) => u._id === formik.values.assignedTo);
-                    if (selectedUser && selectedUser.city?.toLowerCase() !== val.toLowerCase()) {
-                      formik.setFieldValue('assignedTo', '');
+            {!isSalesExecutive && (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <FormSelect
+                  label="City"
+                  name="city"
+                  value={formik.values.city || ''}
+                  onChange={(val) => {
+                    formik.setFieldValue('city', val);
+                    if (val) {
+                      const selectedUser = staff.find((u: any) => u._id === formik.values.assignedTo);
+                      if (selectedUser && selectedUser.city?.toLowerCase() !== val.toLowerCase()) {
+                        formik.setFieldValue('assignedTo', '');
+                      }
                     }
-                  }
-                }}
-                onBlur={() => formik.setFieldTouched('city')}
-                options={[
-                  { value: 'surat', label: 'Surat' },
-                  { value: 'vapi', label: 'Vapi' },
-                  { value: 'navsari', label: 'Navsari' },
-                  { value: 'vadodra', label: 'Vadodara' },
-                  { value: 'bharuch', label: 'Bharuch' },
-                ]}
-                error={getFieldError('city')}
-                placeholder="Select City"
-              />
-            </div>
+                  }}
+                  onBlur={() => formik.setFieldTouched('city')}
+                  options={[
+                    { value: 'surat', label: 'Surat' },
+                    { value: 'vapi', label: 'Vapi' },
+                    { value: 'navsari', label: 'Navsari' },
+                    { value: 'vadodra', label: 'Vadodara' },
+                    { value: 'bharuch', label: 'Bharuch' },
+                  ]}
+                  error={getFieldError('city')}
+                  placeholder="Select City"
+                />
+              </div>
+            )}
 
             <FormInput
               label="Address"
@@ -463,17 +483,19 @@ export default function LeadAddDialog({
                 placeholder="Select Stage"
                 required={requiredFields.includes('leadStatus')}
               />
-              <FormSelect
-                label="User (For Assign)"
-                name="assignedTo"
-                value={formik.values.assignedTo}
-                onChange={(val) => { formik.setFieldValue('assignedTo', val); }}
-                onBlur={() => formik.setFieldTouched('assignedTo')}
-                options={filteredStaff.map((s) => ({ value: s._id, label: `${s.fullName || s.name!}${s.departmentName ? ` (${s.departmentName})` : ''}` }))}
-                error={getFieldError('assignedTo')}
-                placeholder="Select User"
-                required={requiredFields.includes('assignedTo')}
-              />
+              {!isSalesExecutive && (
+                <FormSelect
+                  label="User (For Assign)"
+                  name="assignedTo"
+                  value={formik.values.assignedTo}
+                  onChange={(val) => { formik.setFieldValue('assignedTo', val); }}
+                  onBlur={() => formik.setFieldTouched('assignedTo')}
+                  options={filteredStaff.map((s) => ({ value: s._id, label: `${s.fullName || s.name!}${s.departmentName ? ` (${s.departmentName})` : ''}` }))}
+                  error={getFieldError('assignedTo')}
+                  placeholder="Select User"
+                  required={requiredFields.includes('assignedTo')}
+                />
+              )}
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <FormSelect
