@@ -40,9 +40,11 @@ export default function LeadQuotationDialog({ isOpen, onClose, lead, onRefresh, 
     { title: 'EFFECTIVE PRICE', values: [''] },
   ]);
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (isOpen && lead?._id) {
+      setErrors({});
       let qData = null;
       if (editIndex !== null && editIndex !== undefined && lead.quotations && lead.quotations[editIndex]) {
         qData = lead.quotations[editIndex];
@@ -102,6 +104,19 @@ export default function LeadQuotationDialog({ isOpen, onClose, lead, onRefresh, 
   };
 
   const handleSave = async () => {
+    const newErrors: Record<string, string> = {};
+    if (!solarModule.trim()) {
+      newErrors.solarModule = 'Solar Module is required';
+    }
+    if (!inverter.trim()) {
+      newErrors.inverter = 'Inverter is required';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    setErrors({});
     setSaving(true);
     try {
       const oldQuotation = editIndex !== null && editIndex !== undefined && lead.quotations ? lead.quotations[editIndex] : null;
@@ -246,14 +261,26 @@ export default function LeadQuotationDialog({ isOpen, onClose, lead, onRefresh, 
             name="solarModule"
             type="text"
             value={solarModule}
-            onChange={(e) => setSolarModule(e.target.value)}
+            onChange={(e) => {
+              setSolarModule(e.target.value);
+              if (errors.solarModule) {
+                setErrors(prev => ({ ...prev, solarModule: '' }));
+              }
+            }}
+            error={errors.solarModule}
           />
           <FormInput
             label="Inverter *"
             name="inverter"
             type="text"
             value={inverter}
-            onChange={(e) => setInverter(e.target.value)}
+            onChange={(e) => {
+              setInverter(e.target.value);
+              if (errors.inverter) {
+                setErrors(prev => ({ ...prev, inverter: '' }));
+              }
+            }}
+            error={errors.inverter}
           />
         </div>
 

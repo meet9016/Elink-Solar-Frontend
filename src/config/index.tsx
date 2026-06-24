@@ -1,3 +1,5 @@
+import axios from "axios";
+
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 export const baseUrl = {
@@ -70,7 +72,7 @@ export const baseUrl = {
 
 const TOKEN_COOKIE_NAME = "crm_token";
 
-export function setAuthToken(token: string, days: number = 7) {
+export function setAuthToken(token: string, days: number = 1) {
   if (typeof document === "undefined") return;
   const expires = new Date();
   expires.setDate(expires.getDate() + days);
@@ -94,3 +96,17 @@ export function clearAuthToken() {
   if (typeof document === "undefined") return;
   document.cookie = `${TOKEN_COOKIE_NAME}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
 }
+
+if (typeof window !== "undefined") {
+  axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response && error.response.status === 401 && window.location.pathname !== "/login") {
+        clearAuthToken();
+        window.location.href = "/login";
+      }
+      return Promise.reject(error);
+    }
+  );
+}
+
