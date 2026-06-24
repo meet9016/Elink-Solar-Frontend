@@ -175,7 +175,7 @@ export default function LeadsKanbanView({
     );
 
     const handleDrop = async (newStatusId: string) => {
-        if (!draggingId || !permissions?.update) return;
+        if (!draggingId || !(permissions?.update || permissions?.readOwn)) return;
 
         let sourceStatusId = '';
         const entries = Object.entries(boardLeads);
@@ -437,11 +437,11 @@ export default function LeadsKanbanView({
                                                 key={lead._id}
                                                 lead={lead}
                                                 isUpdating={updatingId === lead._id}
-                                                onDragStart={() => { if (permissions?.update) setDraggingId(lead._id); }}
+                                                onDragStart={() => { if (permissions?.update || permissions?.readOwn) setDraggingId(lead._id); }}
                                                 onView={() => onView?.(lead)}
-                                                onEdit={permissions?.update ? () => onEdit?.(lead) : undefined}
-                                                onMarkLost={permissions?.update ? () => markLost(lead._id) : undefined}
-                                                onMarkWon={permissions?.update ? () => markWon(lead._id) : undefined}
+                                                onEdit={permissions?.update || permissions?.readOwn ? () => onEdit?.(lead) : undefined}
+                                                onMarkLost={permissions?.update || permissions?.readOwn ? () => markLost(lead._id) : undefined}
+                                                onMarkWon={permissions?.update || permissions?.readOwn ? () => markWon(lead._id) : undefined}
                                             />
                                         ))
                                     )}
@@ -484,8 +484,8 @@ export default function LeadsKanbanView({
                         onPageSizeChange={lostPagination?.handleRowsPerPageChange}
                         actions
                         onView={(row) => onView?.(row)}
-                        onEdit={permissions?.update ? (row) => onEdit?.(row) : undefined}
-                        extraActions={permissions?.update ? [{ label: 'Reactivate', onClick: (row) => reactivate(row._id), icon: <RefreshCw className="h-4 w-4" />, color: 'orange' }] : undefined}
+                        onEdit={permissions?.update || permissions?.readOwn ? (row) => onEdit?.(row) : undefined}
+                        extraActions={permissions?.update || permissions?.readOwn ? [{ label: 'Reactivate', onClick: (row) => reactivate(row._id), icon: <RefreshCw className="h-4 w-4" />, color: 'orange' }] : undefined}
                     />
                 </div>
             )}
@@ -517,8 +517,8 @@ export default function LeadsKanbanView({
                         onPageSizeChange={wonPagination?.handleRowsPerPageChange}
                         actions
                         onView={(row) => onView?.(row)}
-                        onEdit={permissions?.update ? (row) => onEdit?.(row) : undefined}
-                        extraActions={permissions?.update ? [
+                        onEdit={permissions?.update || permissions?.readOwn ? (row) => onEdit?.(row) : undefined}
+                        extraActions={permissions?.update || permissions?.readOwn ? [
                             {
                                 label: 'Add Details',
                                 icon: <Plus className="h-3.5 w-3.5" />,

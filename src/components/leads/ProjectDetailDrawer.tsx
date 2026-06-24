@@ -176,6 +176,9 @@ export default function ProjectDetailDrawer({ isOpen, lead, onClose, onSaved }: 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const drawerRef = useRef<HTMLDivElement>(null);
 
+  const [selectedQuotationIdx, setSelectedQuotationIdx] = useState<string>('');
+  const [selectedOptionIdx, setSelectedOptionIdx] = useState<string>('0');
+
   // Fetch existing data when drawer opens
   useEffect(() => {
     if (!isOpen || !lead) return;
@@ -184,6 +187,8 @@ export default function ProjectDetailDrawer({ isOpen, lead, onClose, onSaved }: 
     setExistingFiles({});
     setActiveSection('project');
     setErrors({});
+    setSelectedQuotationIdx('');
+    setSelectedOptionIdx('0');
 
     const fetchData = async () => {
       setLoading(true);
@@ -411,7 +416,7 @@ export default function ProjectDetailDrawer({ isOpen, lead, onClose, onSaved }: 
                   <SectionTitle>Add Details After Project Done</SectionTitle>
 
                   {lead?.quotations && lead.quotations.length > 0 && (
-                    <div className="mb-6 max-w-md">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                       <FormSelect
                         label="Select Quotation (Auto-fill)"
                         name="selectQuotation"
@@ -419,8 +424,12 @@ export default function ProjectDetailDrawer({ isOpen, lead, onClose, onSaved }: 
                           value: idx.toString(),
                           label: `Quotation #${idx + 1} - ${q.solarModule || 'Module'} / ${q.inverter || 'Inverter'} (${q.date ? new Date(q.date).toLocaleDateString('en-GB') : 'N/A'})`
                         }))}
-                        value=""
+                        value={selectedQuotationIdx}
                         onChange={(val) => {
+                          setSelectedQuotationIdx(val);
+                          setSelectedOptionIdx('0');
+                          
+                          // Trigger auto-fill with first option
                           const idx = parseInt(val);
                           const selectedQ = lead.quotations?.[idx];
                           if (selectedQ) {
@@ -468,6 +477,67 @@ export default function ProjectDetailDrawer({ isOpen, lead, onClose, onSaved }: 
                         }}
                         placeholder="Choose a quotation to auto-fill..."
                       />
+
+                      {selectedQuotationIdx !== '' && lead.quotations?.[parseInt(selectedQuotationIdx)] && (
+                        <FormSelect
+                          label="Select Option / Column"
+                          name="selectOption"
+                          options={(lead.quotations[parseInt(selectedQuotationIdx)].options || []).map((opt, optIdx) => ({
+                            value: optIdx.toString(),
+                            label: opt || `Option ${optIdx + 1}`
+                          }))}
+                          value={selectedOptionIdx}
+                          onChange={(val) => {
+                            setSelectedOptionIdx(val);
+                            const qIdx = parseInt(selectedQuotationIdx);
+                            const optIdx = parseInt(val);
+                            const selectedQ = lead.quotations?.[qIdx];
+                            if (selectedQ) {
+                              const getValByKeywords = (keywords: string[]) => {
+                                const row = selectedQ.rows?.find((r: any) => {
+                                  const title = (r.title || '').toUpperCase();
+                                  return keywords.some(kw => title.includes(kw));
+                                });
+                                return row?.values?.[optIdx] || '';
+                              };
+
+                              const panelMake = getValByKeywords(['SOLAR MODULE MAKE', 'PANEL MAKE', 'MODULE MAKE', 'PANEL BRAND', 'MODULE BRAND', 'MODULE COMPANY']);
+                              const panelWp = getValByKeywords(['SYSTEM CAPACITY', 'PANEL WP', 'WATTAGE', 'PANEL CAPACITY']);
+                              const noOfPanel = getValByKeywords(['NO OF PANEL', 'NO. OF PANELS', 'PANEL COUNT', 'PANEL QTY', 'PANEL QUANTITY']);
+                              const inverterMake = getValByKeywords(['INVERTER MAKE', 'INVERTER BRAND', 'INVERTER COMPANY', 'INVERTER']);
+                              const inverterKw = getValByKeywords(['INVERTER KW', 'INVERTER CAPACITY', 'INVERTER SIZE', 'KW']);
+                              const discom = getValByKeywords(['DISCOM', 'DISCOM NAME']);
+                              const roof = getValByKeywords(['ROOF', 'ROOF TYPE', 'INSTALLATION ROOF']);
+                              const connType = getValByKeywords(['CONNECTION', 'CONNECTION TYPE']);
+                              const wiringType = getValByKeywords(['WIRING', 'WIRING TYPE']);
+                              const homeFloor = getValByKeywords(['FLOOR', 'HOME FLOOR']);
+                              const hdgiPipeMake = getValByKeywords(['PIPE MAKE', 'PIPE BRAND', 'HDGI PIPE', 'HDGI']);
+                              const projectAmount = getValByKeywords(['CUSTOMER PAYABLE AMOUNT', 'PROJECT AMOUNT', 'TOTAL PRICE', 'PAYABLE AMOUNT', 'AMOUNT']);
+
+                              const finalPanelMake = panelMake || selectedQ.solarModule || '';
+                              const finalInverterMake = inverterMake || selectedQ.inverter || '';
+
+                              setForm(prev => ({
+                                ...prev,
+                                panelMake: finalPanelMake,
+                                panelWp: panelWp || prev.panelWp,
+                                noOfPanel: noOfPanel || prev.noOfPanel,
+                                inverterMake: finalInverterMake,
+                                inverterKw: inverterKw || prev.inverterKw,
+                                discom: discom ? discom.toLowerCase() : prev.discom,
+                                installationRoof: roof ? roof.toLowerCase() : prev.installationRoof,
+                                consumerConnectionType: connType ? connType.toLowerCase() : prev.consumerConnectionType,
+                                wiringType: wiringType ? wiringType.toLowerCase() : prev.wiringType,
+                                homeFloor: homeFloor || prev.homeFloor,
+                                hdgiPipeMake: hdgiPipeMake || prev.hdgiPipeMake,
+                                projectAmount: projectAmount || prev.projectAmount,
+                              }));
+                              toast.success(`Project details populated from ${lead.quotations[qIdx].options?.[optIdx] || `Option ${optIdx + 1}`}!`);
+                            }
+                          }}
+                          placeholder="Choose option..."
+                        />
+                      )}
                     </div>
                   )}
 

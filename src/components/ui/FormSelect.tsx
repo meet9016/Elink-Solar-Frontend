@@ -15,7 +15,7 @@ export interface SelectOption {
 
 function getBorderClasses(hasError: boolean, isFocused: boolean, disabled: boolean): string {
   if (disabled) return "border-gray-200 bg-gray-50/50 opacity-60 cursor-not-allowed";
-  if (hasError) return "border-red-500 ring-2 ring-red-50";
+  if (hasError) return "border-red-700 ring-2 ring-red-300 focus:border-red-700 focus:ring-red-300";
   if (isFocused) return "border-secondary ring-2 ring-blue-50";
   return "border-gray-200 hover:border-gray-400 shadow-sm hover:shadow-md";
 }
@@ -214,9 +214,9 @@ export const FormSelect: React.FC<FormSelectProps> = ({
       </div>
 
       {hasError && (
-        <div className="mt-1.5 flex items-center gap-1.5 px-1 animate-in slide-in-from-top-1 duration-200">
-          <AlertCircle size={14} className="text-red-500" />
-          <p className="text-red-500 text-xs font-medium">{error}</p>
+        <div className="mt-2 flex items-center gap-1.5 px-1">
+          <AlertCircle size={14} className="text-red-700 flex-shrink-0" />
+          <p className="text-red-700 text-xs">{error}</p>
         </div>
       )}
       {helperText && !hasError && (
@@ -438,9 +438,9 @@ export const FormMultiSelect: React.FC<FormMultiSelectProps> = ({
       </div>
 
       {hasError && (
-        <div className="mt-1.5 flex items-center gap-1.5 px-1 animate-in slide-in-from-top-1 duration-200">
-          <AlertCircle size={14} className="text-red-500" />
-          <p className="text-red-500 text-xs font-medium">{error}</p>
+        <div className="mt-2 flex items-center gap-1.5 px-1">
+          <AlertCircle size={14} className="text-red-700 flex-shrink-0" />
+          <p className="text-red-700 text-xs">{error}</p>
         </div>
       )}
       {helperText && !hasError && (
