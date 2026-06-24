@@ -486,6 +486,18 @@ interface Props {
   statuses: ApiStatus[];
   onClose: () => void;
   onRefresh: () => void;
+  currentUser?: any;
+  isAdmin?: boolean;
+  permissions?: {
+    create: boolean;
+    readAll: boolean;
+    readOwn: boolean;
+    update: boolean;
+    delete: boolean;
+    assign: boolean;
+    transfer: boolean;
+    convert: boolean;
+  };
 }
 
 // Interface for follow-up
@@ -501,7 +513,7 @@ interface FollowUp {
   createdAt?: string;
 }
 
-export default function LeadViewDialog({ lead, statuses, onClose, onRefresh }: Props) {
+export default function LeadViewDialog({ lead, statuses, onClose, onRefresh, currentUser, isAdmin, permissions }: Props) {
   const [editStatus, setEditStatus] = useState('');
   const [editNextDate, setEditNextDate] = useState('');
   const [editNextTime, setEditNextTime] = useState('');
@@ -523,6 +535,20 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh }: P
   const [reassigning, setReassigning] = useState(false);
   const [localAssignedTo, setLocalAssignedTo] = useState<any>(null);
   const [departments, setDepartments] = useState<any[]>([]);
+
+  const canUpdateLead = useMemo(() => {
+    if (isAdmin) return true;
+    if (!permissions?.update) return false;
+    if (permissions.readAll) return true;
+    if (permissions.readOwn) {
+      const userId = currentUser?._id;
+      if (!userId) return false;
+      const assignedId = typeof lead?.assignedTo === 'object' ? lead?.assignedTo?._id : lead?.assignedTo;
+      const createdById = typeof lead?.createdBy === 'object' ? lead?.createdBy?._id : lead?.createdBy;
+      return String(assignedId) === String(userId) || String(createdById) === String(userId);
+    }
+    return false;
+  }, [lead, permissions, currentUser, isAdmin]);
 
   useEffect(() => {
     if (lead) {
@@ -845,13 +871,15 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh }: P
             >
               Close
             </button>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="rounded-lg bg-secondary px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </button>
+            {canUpdateLead && (
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="rounded-lg bg-secondary px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </button>
+            )}
           </>
         }
       >
@@ -898,12 +926,14 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh }: P
                     <div className="text-xs text-gray-500">{assignedToDeptName || localAssignedTo?.role?.name || 'Sales Executive'}</div>
                   </div>
                 </div>
-                <button
-                  onClick={handleOpenReassign}
-                  className="text-sm font-medium text-blue-600 hover:text-blue-700"
-                >
-                  Reassign
-                </button>
+                {canUpdateLead && (
+                  <button
+                    onClick={handleOpenReassign}
+                    className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                  >
+                    Reassign
+                  </button>
+                )}
               </div>
             </div>
             <div className="rounded-lg bg-gray-50 p-4">
@@ -912,11 +942,12 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh }: P
                 {statuses.map((s) => (
                   <button
                     key={s._id}
-                    onClick={() => setEditStatus(s._id)}
+                    onClick={() => canUpdateLead && setEditStatus(s._id)}
+                    disabled={!canUpdateLead}
                     className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${editStatus === s._id
                       ? 'bg-secondary text-white shadow'
                       : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                      }`}
+                      } ${!canUpdateLead ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
                     {s.name}
                   </button>
@@ -934,54 +965,56 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh }: P
               </div>
 
               {/* Add New Follow-up Section */}
-              <div className="mb-6 p-4 bg-white border border-gray-200 rounded-xl">
-                <h4 className="text-sm font-semibold text-gray-700 mb-3">Add New Follow-up</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-500">Date</label>
-                    <input
-                      type="date"
-                      value={editNextDate}
-                      onChange={(e) => setEditNextDate(e.target.value)}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 transition-all outline-none"
+              {canUpdateLead && (
+                <div className="mb-6 p-4 bg-white border border-gray-200 rounded-xl">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Add New Follow-up</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-gray-500">Date</label>
+                      <input
+                        type="date"
+                        value={editNextDate}
+                        onChange={(e) => setEditNextDate(e.target.value)}
+                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 transition-all outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-gray-500">Time</label>
+                      <input
+                        type="time"
+                        value={editNextTime}
+                        onChange={(e) => setEditNextTime(e.target.value)}
+                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 transition-all outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-3 space-y-1">
+                    <label className="text-xs font-medium text-gray-500">Note / Summary</label>
+                    <textarea
+                      value={followupNote}
+                      onChange={(e) => setFollowupNote(e.target.value)}
+                      placeholder="Describe the interaction..."
+                      rows={3}
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 transition-all outline-none resize-none"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-500">Time</label>
-                    <input
-                      type="time"
-                      value={editNextTime}
-                      onChange={(e) => setEditNextTime(e.target.value)}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 transition-all outline-none"
-                    />
-                  </div>
+                  <button
+                    onClick={handleAddFollowup}
+                    disabled={!editNextDate || !followupNote || addingFollowup}
+                    className="mt-3 w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  >
+                    {addingFollowup ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Recording...
+                      </span>
+                    ) : 'Record Follow-up'}
+                  </button>
                 </div>
-                <div className="mt-3 space-y-1">
-                  <label className="text-xs font-medium text-gray-500">Note / Summary</label>
-                  <textarea
-                    value={followupNote}
-                    onChange={(e) => setFollowupNote(e.target.value)}
-                    placeholder="Describe the interaction..."
-                    rows={3}
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 transition-all outline-none resize-none"
-                  />
-                </div>
-                <button
-                  onClick={handleAddFollowup}
-                  disabled={!editNextDate || !followupNote || addingFollowup}
-                  className="mt-3 w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                >
-                  {addingFollowup ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Recording...
-                    </span>
-                  ) : 'Record Follow-up'}
-                </button>
-              </div>
+              )}
 
               {/* Follow-up Table */}
               {localFollowUps && localFollowUps.length > 0 ? (
@@ -1099,23 +1132,25 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh }: P
                     {localAttachments?.length || 0}
                   </span>
                 </div>
-                <div className="relative">
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*,.pdf"
-                    onChange={handleFileUpload}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    title="Upload Attachments"
-                  />
-                  <button
-                    type="button"
-                    disabled={saving}
-                    className="text-xs bg-secondary text-white px-3 py-1.5 font-semibold rounded shadow-sm hover:bg-blue-700 pointer-events-none transition-colors"
-                  >
-                    + Add Attachments
-                  </button>
-                </div>
+                {canUpdateLead && (
+                  <div className="relative">
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*,.pdf"
+                      onChange={handleFileUpload}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      title="Upload Attachments"
+                    />
+                    <button
+                      type="button"
+                      disabled={saving}
+                      className="text-xs bg-secondary text-white px-3 py-1.5 font-semibold rounded shadow-sm hover:bg-blue-700 pointer-events-none transition-colors"
+                    >
+                      + Add Attachments
+                    </button>
+                  </div>
+                )}
               </div>
               
               {localAttachments && localAttachments.length > 0 ? (
@@ -1167,13 +1202,15 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh }: P
                           >
                             <Download className="h-4 w-4" />
                           </button>
-                          <button
-                            onClick={() => handleDeleteAttachment(att)}
-                            className="p-2 hover:bg-red-50 rounded-lg transition-colors text-gray-600 hover:text-red-600"
-                            title="Delete"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                          {canUpdateLead && (
+                            <button
+                              onClick={() => handleDeleteAttachment(att)}
+                              className="p-2 hover:bg-red-50 rounded-lg transition-colors text-gray-600 hover:text-red-600"
+                              title="Delete"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
                         </div>
                       </div>
                     );
@@ -1212,16 +1249,18 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh }: P
             <div className="rounded-lg bg-gray-50 p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="text-sm font-bold text-gray-800">Quotations</div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditQuotationIndex(null);
-                    setQuotationOpen(true);
-                  }}
-                  className="rounded-lg bg-secondary px-4 py-2 text-sm font-semibold text-white hover:bg-primary flex items-center justify-center gap-2 transition-colors"
-                >
-                  <FileText className="h-4 w-4" /> Add Quotation
-                </button>
+                {canUpdateLead && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditQuotationIndex(null);
+                      setQuotationOpen(true);
+                    }}
+                    className="rounded-lg bg-secondary px-4 py-2 text-sm font-semibold text-white hover:bg-primary flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <FileText className="h-4 w-4" /> Add Quotation
+                  </button>
+                )}
               </div>
 
               {localQuotations && localQuotations.length > 0 ? (
@@ -1259,25 +1298,29 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh }: P
                               >
                                 <Download className="h-4 w-4" />
                               </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setEditQuotationIndex(idx);
-                                  setQuotationOpen(true);
-                                }}
-                                className="p-1 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded transition-colors"
-                                title="Edit Quotation"
-                              >
-                                <FileText className="h-4 w-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteQuotation(idx)}
-                                className="p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                                title="Delete Quotation"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
+                              {canUpdateLead && (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setEditQuotationIndex(idx);
+                                      setQuotationOpen(true);
+                                    }}
+                                    className="p-1 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded transition-colors"
+                                    title="Edit Quotation"
+                                  >
+                                    <FileText className="h-4 w-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteQuotation(idx)}
+                                    className="p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                    title="Delete Quotation"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
+                                </>
+                              )}
                             </div>
                           </td>
                         </tr>

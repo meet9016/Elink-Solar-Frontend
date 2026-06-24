@@ -28,7 +28,7 @@ export default function KanbanCard({
     lead, onDragStart, onView, onEdit, onMarkLost, onMarkWon, isUpdating
 }: {
     lead: ApiLead;
-    onDragStart: () => void;
+    onDragStart?: () => void;
     onView: () => void;
     onEdit?: () => void;
     onMarkLost?: () => void;
@@ -37,10 +37,10 @@ export default function KanbanCard({
 }) {
     return (
         <div
-            draggable={!isUpdating}
-            onDragStart={!isUpdating ? onDragStart : undefined}
+            draggable={!isUpdating && !!onDragStart}
+            onDragStart={!isUpdating && onDragStart ? onDragStart : undefined}
             className={`relative rounded-xl bg-white p-3 shadow-sm transition-shadow ${
-                isUpdating ? "opacity-60 pointer-events-none" : "cursor-move hover:shadow-md"
+                isUpdating ? "opacity-60 pointer-events-none" : (onDragStart ? "cursor-move hover:shadow-md" : "hover:shadow-md")
             }`}
         >
             {isUpdating && (
