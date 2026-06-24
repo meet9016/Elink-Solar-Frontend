@@ -25,6 +25,7 @@ import {
 import { useLeadsData } from '@/components/leads/useLeadsData';
 import FormInput from '@/components/ui/Input';
 import { FormMultiSelect } from '@/components/ui/FormSelect';
+import DateRangePicker from '@/components/ui/DateRangePicker';
 
 export type ViewMode = 'list' | 'kanban';
 export type KanbanSubView = 'board' | 'lost' | 'won';
@@ -436,7 +437,7 @@ export default function LeadsPage() {
           }`}
         >
           <div className="overflow-hidden">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
               <div className="space-y-2">
                 <FormMultiSelect
                   label="Lead Status"
@@ -464,26 +465,14 @@ export default function LeadsPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <FormInput
-                  label="From Date"
-                  name="fromDate"
-                  type="date"
-                  value={fromDate}
-                  onChange={(e) => setFromDate(e.target.value)}
-                  className="bg-white"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <FormInput
-                  label="To Date"
-                  name="toDate"
-                  type="date"
-                  value={toDate}
-                  min={fromDate || undefined}
-                  onChange={(e) => setToDate(e.target.value)}
-                  className="bg-white"
+              <div className="lg:col-span-2 w-full">
+                <DateRangePicker
+                  fromDate={fromDate}
+                  toDate={toDate}
+                  onFromDateChange={setFromDate}
+                  onToDateChange={setToDate}
+                  onReset={() => { setFromDate(''); setToDate(''); }}
+                  labelType="top"
                 />
               </div>
             </div>
