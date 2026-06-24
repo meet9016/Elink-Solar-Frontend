@@ -44,7 +44,7 @@ const validationSchema = Yup.object({
 
   email: Yup.string()
     .required('Email is required')
-    .email('Invalid email format'),
+    .matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Invalid email format'),
 
   password: Yup.string()
     .when('$isUpdate', {
@@ -321,7 +321,10 @@ export default function SalesExecutiveForm({
             name="number"
             type="tel"
             value={formik.values.number}
-            onChange={formik.handleChange}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const numericOnly = e.target.value.replace(/\D/g, '').slice(0, 10);
+              formik.setFieldValue('number', numericOnly);
+            }}
             onBlur={formik.handleBlur}
             error={formik.touched.number && formik.errors.number ? formik.errors.number : undefined}
             required
