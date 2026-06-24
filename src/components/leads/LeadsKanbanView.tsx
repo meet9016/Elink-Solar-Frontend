@@ -54,6 +54,8 @@ interface Props {
     wonPagination?: PaginationShape;
     onSubViewChange?: (subView: 'board' | 'lost' | 'won') => void;
     refreshKey?: number;
+    currentUser?: any;
+    isAdmin?: boolean;
 }
 
 type SubView = 'board' | 'lost' | 'won';
@@ -67,12 +69,28 @@ export default function LeadsKanbanView({
     wonPagination,
     onSubViewChange,
     refreshKey = 0,
+    currentUser,
+    isAdmin,
 }: Props) {
     const [subView, setSubView] = useState<SubView>('board');
     const [draggingId, setDraggingId] = useState<string | null>(null);
     const [updatingId, setUpdatingId] = useState<string | null>(null);
     const [projectDetailLead, setProjectDetailLead] = useState<ApiLead | null>(null);
     const [paymentLead, setPaymentLead] = useState<ApiLead | null>(null);
+
+    const canEditLead = (lead: ApiLead) => {
+        if (isAdmin) return true;
+        if (!permissions?.update) return false;
+        if (permissions.readAll) return true;
+        if (permissions.readOwn) {
+            const userId = currentUser?._id;
+            if (!userId) return false;
+            const assignedId = typeof lead?.assignedTo === 'object' ? lead?.assignedTo?._id : lead?.assignedTo;
+            const createdById = typeof lead?.createdBy === 'object' ? lead?.createdBy?._id : lead?.createdBy;
+            return String(assignedId) === String(userId) || String(createdById) === String(userId);
+        }
+        return false;
+    };
     
     // Board state
     const [boardLeads, setBoardLeads] = useState<Record<string, ApiLead[]>>({});
@@ -175,19 +193,22 @@ export default function LeadsKanbanView({
     );
 
     const handleDrop = async (newStatusId: string) => {
-        if (!draggingId || !(permissions?.update || permissions?.readOwn)) return;
+        if (!draggingId) return;
 
         let sourceStatusId = '';
+        let draggingLead: ApiLead | null = null;
         const entries = Object.entries(boardLeads);
         for (let i = 0; i < entries.length; i++) {
             const [sId, leadsArr] = entries[i];
-            if (leadsArr.some(l => l._id === draggingId)) {
+            const found = leadsArr.find(l => l._id === draggingId);
+            if (found) {
                 sourceStatusId = sId;
+                draggingLead = found;
                 break;
             }
         }
 
-        if (sourceStatusId === newStatusId || !sourceStatusId) {
+        if (!draggingLead || !canEditLead(draggingLead) || sourceStatusId === newStatusId || !sourceStatusId) {
             setDraggingId(null);
             return;
         }
@@ -437,11 +458,11 @@ export default function LeadsKanbanView({
                                                 key={lead._id}
                                                 lead={lead}
                                                 isUpdating={updatingId === lead._id}
-                                                onDragStart={() => { if (permissions?.update || permissions?.readOwn) setDraggingId(lead._id); }}
+                                                onDragStart={canEditLead(lead) ? () => setDraggingId(lead._id) : undefined}
                                                 onView={() => onView?.(lead)}
-                                                onEdit={permissions?.update || permissions?.readOwn ? () => onEdit?.(lead) : undefined}
-                                                onMarkLost={permissions?.update || permissions?.readOwn ? () => markLost(lead._id) : undefined}
-                                                onMarkWon={permissions?.update || permissions?.readOwn ? () => markWon(lead._id) : undefined}
+                                                onEdit={canEditLead(lead) ? () => onEdit?.(lead) : undefined}
+                                                onMarkLost={canEditLead(lead) ? () => markLost(lead._id) : undefined}
+                                                onMarkWon={canEditLead(lead) ? () => markWon(lead._id) : undefined}
                                             />
                                         ))
                                     )}
@@ -485,7 +506,8 @@ export default function LeadsKanbanView({
                         actions
                         onView={(row) => onView?.(row)}
                         onEdit={permissions?.update || permissions?.readOwn ? (row) => onEdit?.(row) : undefined}
-                        extraActions={permissions?.update || permissions?.readOwn ? [{ label: 'Reactivate', onClick: (row) => reactivate(row._id), icon: <RefreshCw className="h-4 w-4" />, color: 'orange' }] : undefined}
+                        canEdit={canEditLead}
+                        extraActions={permissions?.update || permissions?.readOwn ? [{ label: 'Reactivate', onClick: (row) => reactivate(row._id), icon: <RefreshCw className="h-4 w-4" />, color: 'orange', show: (row) => canEditLead(row) }] : undefined}
                     />
                 </div>
             )}
@@ -518,18 +540,21 @@ export default function LeadsKanbanView({
                         actions
                         onView={(row) => onView?.(row)}
                         onEdit={permissions?.update || permissions?.readOwn ? (row) => onEdit?.(row) : undefined}
+                        canEdit={canEditLead}
                         extraActions={permissions?.update || permissions?.readOwn ? [
                             {
                                 label: 'Add Details',
                                 icon: <Plus className="h-3.5 w-3.5" />,
                                 color: 'emerald',
                                 onClick: (row) => setProjectDetailLead(row),
+                                show: (row) => canEditLead(row),
                             },
                             {
                                 label: 'Payment',
                                 icon: <span className="text-xs font-bold">₹</span>,
                                 color: 'emerald',
                                 onClick: (row) => setPaymentLead(row),
+                                show: (row) => canEditLead(row),
                             }
                         ] : undefined}
                     />

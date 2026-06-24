@@ -82,6 +82,7 @@ export default function LeadsPage() {
     convert?: boolean;
   } | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   const token = typeof window !== 'undefined' ? getAuthToken() : null;
 
@@ -95,7 +96,9 @@ export default function LeadsPage() {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const role = res.data?.data?.role || {};
+        const staff = res.data?.data;
+        setCurrentUser(staff);
+        const role = staff?.role || {};
         const rawPerms = Array.isArray(role.permissions)
           ? role.permissions[0]
           : role.permissions || {};
@@ -540,6 +543,8 @@ export default function LeadsPage() {
             // Notify parent when sub-view changes so hook fetches correct data
             onSubViewChange={setKanbanSubView}
             refreshKey={boardRefreshKey}
+            currentUser={currentUser}
+            isAdmin={isAdmin}
             permissions={{
               create: canCreate,
               readAll: canReadAll,
@@ -580,6 +585,18 @@ export default function LeadsPage() {
         onRefresh={() => {
           refetchAll();
           setBoardRefreshKey((k) => k + 1);
+        }}
+        currentUser={currentUser}
+        isAdmin={isAdmin}
+        permissions={{
+          create: canCreate,
+          readAll: canReadAll,
+          readOwn: canReadOwn,
+          update: canUpdate,
+          delete: canDelete,
+          assign: canAssign,
+          transfer: canTransfer,
+          convert: canConvert,
         }}
       />
 
