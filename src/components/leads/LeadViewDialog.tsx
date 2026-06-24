@@ -480,6 +480,8 @@ import { getFileIcon } from '@/utills/utill';
 import LeadQuotationDialog from './LeadQuotationDialog';
 import { FormSelect } from '../ui/FormSelect';
 import { generateQuotationPDF } from '@/utills/quotationPdfGenerator';
+import DatePicker from 'react-datepicker';
+import Swal from 'sweetalert2';
 
 interface Props {
   lead: ApiLead | null;
@@ -691,7 +693,16 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh, cur
         note: followupNote,
       };
 
-      const updatedFollowUps = [...(lead.followUps || []), newFollowup];
+      const cleanLocalFollowUps = localFollowUps
+        .filter(f => !f._id?.startsWith('temp_'))
+        .map(f => ({
+          date: f.date,
+          time: f.time,
+          note: f.note,
+          staff: f.staff?._id || f.staff
+        }));
+
+      const updatedFollowUps = [...cleanLocalFollowUps, newFollowup];
 
       const response = await axios.put(
         `${baseUrl.updateLead}/${lead._id}`,
@@ -720,6 +731,47 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh, cur
     }
   };
 
+  const handleDeleteFollowup = async (fId: string) => {
+    if (!lead) return;
+    const result = await Swal.fire({
+      title: 'Delete Follow-up?',
+      text: 'Are you sure you want to delete this follow-up?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Delete',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6D7A86',
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const updatedFollowUps = localFollowUps
+        .filter(f => f._id !== fId)
+        .map(f => ({
+          date: f.date,
+          time: f.time,
+          note: f.note,
+          staff: f.staff?._id || f.staff
+        }));
+
+      const response = await axios.put(
+        `${baseUrl.updateLead}/${lead._id}`,
+        { followUps: updatedFollowUps },
+        { headers: { Authorization: `Bearer ${getAuthToken()}` } }
+      );
+
+      if (response.data?.data?.followUps) {
+        setLocalFollowUps(response.data.data.followUps);
+      }
+      toast.success('Follow-up deleted successfully');
+      onRefresh();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || 'Failed to delete follow-up');
+    }
+  };
+
   const handleView = (attachment: any) => {
     const fileUrl = attachment.path?.startsWith('http') ? attachment.path : `${process.env.NEXT_PUBLIC_IMAGE_URL}${attachment.path}`;
     const isImage = /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i.test(attachment.filename || attachment.path);
@@ -736,9 +788,18 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh, cur
   };
 
   const handleDeleteAttachment = async (attachment: any) => {
-    if (!window.confirm(`Are you sure you want to delete "${attachment.originalName}"?`)) {
-      return;
-    }
+    const result = await Swal.fire({
+      title: 'Delete Attachment?',
+      text: `Are you sure you want to delete "${attachment.originalName}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Delete',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6D7A86',
+    });
+
+    if (!result.isConfirmed) return;
     
     try {
       await axios.delete(
@@ -754,7 +815,20 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh, cur
   };
 
   const handleDeleteQuotation = async (indexToDelete: number) => {
-    if (!lead || !window.confirm('Are you sure you want to delete this quotation?')) return;
+    if (!lead) return;
+    const result = await Swal.fire({
+      title: 'Delete Quotation?',
+      text: 'Are you sure you want to delete this quotation?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Delete',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6D7A86',
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
       const updatedQuotations = (localQuotations || []).filter((_, i) => i !== indexToDelete);
       await axios.put(
@@ -971,11 +1045,14 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh, cur
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-xs font-medium text-gray-500">Date</label>
-                      <input
-                        type="date"
-                        value={editNextDate}
-                        onChange={(e) => setEditNextDate(e.target.value)}
-                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 transition-all outline-none"
+                      <DatePicker
+                        selected={editNextDate ? new Date(editNextDate) : null}
+                        onChange={(date) => setEditNextDate(date ? date.toISOString().split('T')[0] : '')}
+                        placeholderText="mm/dd/yyyy"
+                        dateFormat="MM/dd/yyyy"
+                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-1 focus:ring-secondary transition-all outline-none cursor-pointer"
+                        wrapperClassName="w-full"
+                        popperProps={{ strategy: 'fixed' }}
                       />
                     </div>
                     <div className="space-y-1">
@@ -1039,13 +1116,16 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh, cur
                   </div>
                   
                   {/* Table */}
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm">
+                  <div className="overflow-x-auto max-h-[300px] overflow-y-auto relative">
+                    <table className="w-full text-left text-sm border-collapse">
                       <thead>
-                        <tr className="bg-gray-100 border-b border-gray-200">
-                          <th className="px-4 py-3 font-semibold text-gray-600">Date & Time</th>
-                          <th className="px-4 py-3 font-semibold text-gray-600">Note</th>
-                          <th className="px-4 py-3 font-semibold text-gray-600">Staff</th>
+                        <tr className="border-b border-gray-200">
+                          <th className="px-4 py-3 font-semibold text-gray-600 bg-gray-100 sticky top-0 z-10">Date & Time</th>
+                          <th className="px-4 py-3 font-semibold text-gray-600 bg-gray-100 sticky top-0 z-10">Note</th>
+                          <th className="px-4 py-3 font-semibold text-gray-600 bg-gray-100 sticky top-0 z-10">Staff</th>
+                          {canUpdateLead && (
+                            <th className="px-4 py-3 font-semibold text-gray-600 bg-gray-100 sticky top-0 z-10 text-right pr-6">Actions</th>
+                          )}
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50">
@@ -1079,6 +1159,19 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh, cur
                                 <span className="text-gray-600">{f.staff?.fullName || staffInfo?.fullName || 'Current User'}</span>
                               </div>
                             </td>
+                            {canUpdateLead && (
+                              <td className="px-4 py-3 text-right pr-6 whitespace-nowrap">
+                                <button
+                                  type="button"
+                                  onClick={() => f._id && handleDeleteFollowup(f._id)}
+                                  disabled={f._id?.startsWith('temp_')}
+                                  className="p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-40"
+                                  title="Delete Follow-up"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </td>
+                            )}
                           </tr>
                         ))}
                       </tbody>
