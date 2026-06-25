@@ -30,32 +30,6 @@ interface SalesExecutiveFormProps {
   initialData?: SalesExecutive | null;
 }
 
-// Validation schema
-const validationSchema = Yup.object({
-  fullName: Yup.string()
-    .required('Full name is required')
-    .min(2, 'Full name must be at least 2 characters')
-    .max(100, 'Full name must be at most 100 characters')
-    .matches(/^[a-zA-Z\s]+$/, 'Full name can only contain letters and spaces'),
-
-  number: Yup.string()
-    .required('Mobile number is required')
-    .matches(/^[0-9]{10}$/, 'Mobile number must be exactly 10 digits'),
-
-  email: Yup.string()
-    .required('Email is required')
-    .matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Invalid email format'),
-
-  password: Yup.string()
-    .when('$isUpdate', {
-      is: false,
-      then: (schema) => schema.required('Password is required').min(6, 'Password must be at least 6 characters'),
-      otherwise: (schema) => schema.notRequired(),
-    }),
-  city: Yup.string()
-    .required('City is required'),
-});
-
 export default function SalesExecutiveForm({
   isOpen,
   onClose,
@@ -95,10 +69,26 @@ export default function SalesExecutiveForm({
       id: undefined as string | number | undefined,
       image: undefined as string | undefined,
     },
-    validationSchema,
+    validationSchema: Yup.object({
+      fullName: Yup.string()
+        .required('Full name is required')
+        .min(2, 'Full name must be at least 2 characters')
+        .max(100, 'Full name must be at most 100 characters')
+        .matches(/^[a-zA-Z\s]+$/, 'Full name can only contain letters and spaces'),
+      number: Yup.string()
+        .required('Mobile number is required')
+        .matches(/^[0-9]{10}$/, 'Mobile number must be exactly 10 digits'),
+      email: Yup.string()
+        .required('Email is required')
+        .matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Invalid email format'),
+      password: isUpdate 
+        ? Yup.string().notRequired()
+        : Yup.string().required('Password is required').min(6, 'Password must be at least 6 characters'),
+      city: Yup.string()
+        .required('City is required'),
+    }),
     validateOnChange: true,
     validateOnBlur: true,
-    context: { isUpdate },
     onSubmit: async (values) => {
       await handleSubmit(values);
     },
