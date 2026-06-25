@@ -216,7 +216,16 @@ export default function SalesExecutiveForm({
       onClose();
 
     } catch (err: any) {
-      const message = err.response?.data?.message || 'Something went wrong';
+      let message = err.response?.data?.message || 'Something went wrong';
+      if (message.includes('E11000') || message.includes('duplicate key')) {
+        if (message.includes('phone')) {
+          message = 'This mobile number is already registered.';
+        } else if (message.includes('email')) {
+          message = 'This email is already registered.';
+        } else {
+          message = 'Duplicate entry found.';
+        }
+      }
       setError(message);
       toast.error(message);
     } finally {
@@ -252,12 +261,6 @@ export default function SalesExecutiveForm({
       }
     >
       <form id="sales-executive-form" onSubmit={formik.handleSubmit} className="space-y-6">
-        {error && (
-          <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
         {/* Image Upload with Round Preview */}
         <div className="flex justify-center">
           <div className="relative">
