@@ -9,6 +9,9 @@ import axios from 'axios';
 import { baseUrl, getAuthToken } from '@/config';
 import DeleteDialog from '@/components/DeleteDialog';
 import FormInput from '@/components/ui/Input';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { fetchCategories } from '@/redux/slices/categorySlice';
+import { useRef } from 'react';
 
 function useDebounce<T>(value: T, delay: number = 500): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -41,6 +44,9 @@ const validationSchema = Yup.object({
 });
 
 export function CategoryContent() {
+  const dispatch = useAppDispatch();
+  const { data: reduxCategories, status: reduxStatus } = useAppSelector((state) => state.category);
+  
   const [allData, setAllData] = useState<CategoryItem[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [search, setSearch] = useState('');
@@ -70,45 +76,36 @@ export function CategoryContent() {
     enableReinitialize: true,
   });
 
-  const fetchData = async () => {
-    try {
-      const res = await axios.get(baseUrl.category, {
-        headers,
-        params: {
-          search: debouncedSearch || undefined,
-          page: currentPage,
-          limit: pageSize,
-        },
-      });
+  const hasDispatchedRef = useRef(false);
 
-      const data = (res.data?.data as { _id: string; name?: string; createdAt?: string }[]) ?? [];
-      const items: CategoryItem[] = data.map((i) => ({
-        _id: i._id,
-        name: i.name || '',
-        createdAt: i.createdAt ? new Date(i.createdAt).toLocaleDateString() : '-',
-      }));
-
-      // Filter locally if search is present (if backend doesn't support search yet)
-      let filteredItems = items;
-      if (debouncedSearch) {
-        filteredItems = items.filter(item => 
-          item.name.toLowerCase().includes(debouncedSearch.toLowerCase())
-        );
-      }
-
-      setAllData(filteredItems);
-      setTotalRecords(filteredItems.length); // Mock pagination if backend doesn't paginate
-    } catch (err) {
-      console.error('Failed to load categories', err);
-      setAllData([]);
-      setTotalRecords(0);
-    }
-  };
-
-  // initial load & whenever search/page/limit changes
   useEffect(() => {
-    fetchData();
-  }, [debouncedSearch, currentPage, pageSize]);
+    if (reduxStatus === 'idle' && !hasDispatchedRef.current) {
+      hasDispatchedRef.current = true;
+      dispatch(fetchCategories());
+    }
+  }, [reduxStatus, dispatch]);
+
+  useEffect(() => {
+    // Local pagination and filtering from Redux state
+    let filteredItems = reduxCategories.map((i) => ({
+      _id: i._id,
+      name: i.name || '',
+      createdAt: i.createdAt ? new Date(i.createdAt).toLocaleDateString() : '-',
+    }));
+
+    if (debouncedSearch) {
+      filteredItems = filteredItems.filter(item => 
+        item.name.toLowerCase().includes(debouncedSearch.toLowerCase())
+      );
+    }
+
+    setTotalRecords(filteredItems.length);
+    
+    // local pagination
+    const startIdx = (currentPage - 1) * pageSize;
+    const paginatedItems = filteredItems.slice(startIdx, startIdx + pageSize);
+    setAllData(paginatedItems);
+  }, [reduxCategories, debouncedSearch, currentPage, pageSize]);
 
   /* ================= SAVE (ADD / EDIT) ================= */
 
@@ -123,7 +120,7 @@ export function CategoryContent() {
       } else {
         await axios.post(baseUrl.category, payload, { headers });
       }
-      await fetchData();
+      await dispatch(fetchCategories());
       
       setIsDialogOpen(false);
       formik.resetForm();
@@ -145,7 +142,7 @@ export function CategoryContent() {
 
     try {
       await axios.delete(`${baseUrl.category}/${categoryToDelete._id}`, { headers });
-      await fetchData();
+      await dispatch(fetchCategories());
       setShowDeleteDialog(false);
       setCategoryToDelete(null);
     } catch (err) {
