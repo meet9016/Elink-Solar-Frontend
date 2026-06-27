@@ -377,13 +377,18 @@ export function useLeadsData(
       } else {
         const lostPageChanged = !prevParsed || prevParsed.lostPage !== lostPage;
         const wonPageChanged = !prevParsed || prevParsed.wonPage !== wonPage;
+        const kanbanSubViewChanged = !prevParsed || prevParsed.kanbanSubView !== kanbanSubView;
         
-        // On initial load or filter change, kanban fetches all active leads + first page of lost & won
-        if (filtersChanged || viewModeChanged) {
-          calls.push(fetchKanbanLeads(activeTab, filters, signal));
-          calls.push(fetchLostLeads(activeTab, filters, 1, signal));
-          calls.push(fetchWonLeads(activeTab, filters, 1, signal));
+        if (filtersChanged || viewModeChanged || kanbanSubViewChanged) {
+          if (kanbanSubView === 'board') {
+            calls.push(fetchKanbanLeads(activeTab, filters, signal));
+          } else if (kanbanSubView === 'lost') {
+            calls.push(fetchLostLeads(activeTab, filters, lostPage, signal));
+          } else if (kanbanSubView === 'won') {
+            calls.push(fetchWonLeads(activeTab, filters, wonPage, signal));
+          }
         } else {
+          // Pagination changes for lost/won while staying on the same subview
           if (kanbanSubView === 'lost' && lostPageChanged) calls.push(fetchLostLeads(activeTab, filters, lostPage, signal));
           if (kanbanSubView === 'won' && wonPageChanged) calls.push(fetchWonLeads(activeTab, filters, wonPage, signal));
         }

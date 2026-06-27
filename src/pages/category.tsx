@@ -85,29 +85,42 @@ export function CategoryContent() {
     }
   }, [reduxStatus, dispatch]);
 
-  useEffect(() => {
-    // Local pagination and filtering from Redux state
-    let filteredItems = reduxCategories.map((i) => ({
-      _id: i._id,
-      name: i.name || '',
-      createdAt: i.createdAt ? new Date(i.createdAt).toLocaleDateString() : '-',
-    }));
-
-    if (debouncedSearch) {
-      filteredItems = filteredItems.filter(item => 
-        item.name.toLowerCase().includes(debouncedSearch.toLowerCase())
-      );
+  const fetchData = async (signal?: AbortSignal) => {
+    try {
+      const res = await axios.get(baseUrl.category, {
+        headers,
+        params: {
+          search: debouncedSearch || undefined,
+          page: currentPage,
+          limit: pageSize,
+        },
+        signal,
+      });
+      const data = (res.data?.data as any[]) ?? [];
+      const pagination = res.data?.pagination || {};
+      
+      const items: CategoryItem[] = data.map((i) => ({
+        _id: i._id,
+        name: i.name || '',
+        createdAt: i.createdAt ? new Date(i.createdAt).toLocaleDateString() : '-',
+      }));
+      setAllData(items);
+      setTotalRecords(pagination.totalRecords ?? items.length);
+    } catch (err) {
+      if (axios.isCancel(err)) return;
+      console.error('Failed to load categories', err);
+      setAllData([]);
     }
+  };
 
-    setTotalRecords(filteredItems.length);
-    
-    // local pagination
-    const startIdx = (currentPage - 1) * pageSize;
-    const paginatedItems = filteredItems.slice(startIdx, startIdx + pageSize);
-    setAllData(paginatedItems);
-  }, [reduxCategories, debouncedSearch, currentPage, pageSize]);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchData(controller.signal);
+    return () => controller.abort();
+  }, [debouncedSearch, currentPage, pageSize]);
 
   /* ================= SAVE (ADD / EDIT) ================= */
+
 
   const saveCategory = async (values: { _id?: string; name: string }) => {
     setIsSubmitting(true);
