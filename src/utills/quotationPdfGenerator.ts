@@ -28,66 +28,103 @@ export const generateQuotationPDF = async (lead: ApiLead) => {
   container.style.position = 'absolute';
   container.style.left = '-9999px';
   container.style.top = '-9999px';
-  container.style.width = '800px'; // standard A4-like width in pixels
+  container.style.width = '800px'; 
+  container.style.minHeight = '1130px'; 
   container.style.backgroundColor = '#ffffff';
-  container.style.padding = '40px';
-  container.style.fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
+  container.style.padding = '40px 60px'; // Matching margins of the screenshot
+  container.style.fontFamily = 'Montserrat, Arial, sans-serif';
+  container.style.boxSizing = 'border-box';
 
   container.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #a63c71; padding-bottom: 20px; margin-bottom: 30px;">
-      <div style="font-size: 28px; font-weight: 800; color: #1e1b4b; text-transform: uppercase; letter-spacing: 1px;">
-        SMS <span style="color: #a63c71;">Solar</span>
+    <!-- Header with Logo and Date -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+      <div style="width: 120px;">
+        <!-- Using SMS Logo instead of GS -->
+        <img src="/logo/solar (2).png" alt="SMS Solar" style="max-width: 100%; height: auto;" />
       </div>
-      <div style="text-align: right;">
-        <h1 style="margin: 0; font-size: 24px; color: #1e1b4b; font-weight: 700;">SOLAR SYSTEM QUOTATION</h1>
-        <p style="margin: 5px 0 0 0; font-size: 14px; color: #6b7280;">Date: ${formattedDate}</p>
-      </div>
-    </div>
-
-    <div style="display: flex; gap: 20px; margin-bottom: 30px;">
-      <div style="flex: 1; background-color: #fdf2f7; border: 1px solid #fbcfe8; border-radius: 12px; padding: 20px;">
-        <h3 style="margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; color: #a63c71; letter-spacing: 0.5px; border-bottom: 1.5px solid #fbcfe8; padding-bottom: 5px;">Customer Details</h3>
-        <p style="margin: 8px 0; font-size: 14px; color: #4b5563;"><strong>Name:</strong> ${lead.fullName || 'N/A'}</p>
-        <p style="margin: 8px 0; font-size: 14px; color: #4b5563;"><strong>Phone:</strong> ${lead.contact || 'N/A'}</p>
-        <p style="margin: 8px 0; font-size: 14px; color: #4b5563;"><strong>Email:</strong> ${lead.email || 'N/A'}</p>
-        <p style="margin: 8px 0; font-size: 14px; color: #4b5563;"><strong>Address:</strong> ${lead.address || 'N/A'}</p>
-      </div>
-      <div style="flex: 1; background-color: #fdf2f7; border: 1px solid #fbcfe8; border-radius: 12px; padding: 20px;">
-        <h3 style="margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; color: #a63c71; letter-spacing: 0.5px; border-bottom: 1.5px solid #fbcfe8; padding-bottom: 5px;">Technical Details</h3>
-        <p style="margin: 8px 0; font-size: 14px; color: #4b5563;"><strong>Solar Module:</strong> ${solarModule || 'N/A'}</p>
-        <p style="margin: 8px 0; font-size: 14px; color: #4b5563;"><strong>Inverter:</strong> ${inverter || 'N/A'}</p>
-        <p style="margin: 8px 0; font-size: 14px; color: #4b5563;"><strong>Quotation Date:</strong> ${formattedDate}</p>
+      <div style="font-weight: 700; font-size: 16px; color: #1e293b; margin-top: 15px;">
+        DATE: ${formattedDate.split(',')[0] || formattedDate}
       </div>
     </div>
 
-    <div style="margin-bottom: 30px; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
-      <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
-        <thead>
-          <tr style="background-color: #a63c71; color: white;">
-            <th style="padding: 14px 18px; text-transform: uppercase; font-size: 12px; font-weight: 700; border: 1px solid #e5e7eb;">Row Title</th>
-            ${options.map(opt => `<th style="padding: 14px 18px; text-transform: uppercase; font-size: 12px; font-weight: 700; border: 1px solid #e5e7eb;">${opt}</th>`).join('')}
-          </tr>
-        </thead>
-        <tbody>
-          ${rows.map((row, index) => `
-            <tr style="background-color: ${index % 2 === 0 ? '#ffffff' : '#fdf2f7'};">
-              <td style="padding: 14px 18px; font-weight: 700; color: #1e1b4b; border: 1px solid #e5e7eb; background-color: #fdf2f7;">${row.title}</td>
-              ${row.values.map(val => `<td style="padding: 14px 18px; border: 1px solid #e5e7eb;">${val || '-'}</td>`).join('')}
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
+    <!-- Commercial Offer Section -->
+    <div style="margin-bottom: 15px;">
+      <h2 style="margin: 0 0 10px 0; font-size: 20px; font-weight: 800; color: #1e3a8a; text-transform: uppercase;">COMMERCIAL OFFER:</h2>
+      <p style="margin: 0; font-size: 14px; color: #64748b; font-weight: 500;">Price for complete solar system with 5 years free AMC.</p>
     </div>
 
-    <div style="margin-top: 60px; border-top: 1.5px solid #fbcfe8; padding-top: 20px; display: flex; justify-content: space-between; font-size: 12px; color: #6b7280;">
-      <div>
-        <p style="margin: 5px 0;">Thank you for choosing SMS Solar.</p>
-        <p style="margin: 5px 0;">This is a computer-generated quotation.</p>
-      </div>
-      <div style="text-align: center; width: 200px;">
-        <div style="border-bottom: 1.5px solid #a63c71; height: 50px; margin-bottom: 8px;"></div>
-        <p style="margin: 0; font-weight: 600; color: #1e1b4b;">Authorized Signature</p>
-      </div>
+    <!-- Dynamic Quotation Table -->
+    <table style="width: 100%; border-collapse: separate; border-spacing: 2px; text-align: center; font-size: 13px; font-weight: 700; margin-bottom: 15px;">
+      <tbody>
+        <tr>
+          <td style="width: 70%; background-color: #899bb4; color: #1e293b; padding: 10px; text-transform: uppercase;">SOLAR MODULE MAKE</td>
+          <td style="width: 30%; background-color: #d0d7e2; color: #1e293b; padding: 10px;">${solarModule || '-'}</td>
+        </tr>
+        <tr>
+          <td style="background-color: #899bb4; color: #1e293b; padding: 10px; text-transform: uppercase;">INVERTER</td>
+          <td style="background-color: #d0d7e2; color: #1e293b; padding: 10px;">${inverter || '-'}</td>
+        </tr>
+        ${rows.map((row) => `
+        <tr>
+          <td style="background-color: #899bb4; color: #1e293b; padding: 10px; text-transform: uppercase;">${row.title}</td>
+          <td style="background-color: #d0d7e2; color: #1e293b; padding: 10px;">${row.values[0] || row.values.join(', ') || '-'}</td>
+        </tr>
+        `).join('')}
+      </tbody>
+    </table>
+
+    <p style="margin: 0 0 20px 0; font-size: 11px; color: #1e3a8a; line-height: 1.4;">
+      <strong>Note:</strong> If you are eligible, the subsidy amount will be credited by the government to your bank account after the meter installation is completed. Please keep this in mind during your planning.
+    </p>
+
+    <!-- Documents Required Section -->
+    <table style="width: 100%; border-collapse: separate; border-spacing: 2px; text-align: center; font-size: 12px; margin-bottom: 20px; font-weight: 600; color: #1e293b;">
+      <thead>
+        <tr>
+          <th style="width: 50%; background-color: #899bb4; padding: 10px; text-transform: uppercase; font-weight: 700;">DOCUMENTS REQUIRED FOR INDIVIDUAL SOLAR</th>
+          <th style="width: 50%; background-color: #899bb4; padding: 10px; text-transform: uppercase; font-weight: 700;">DOCUMENTS REQUIRED FOR COMMON SOLAR</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Latest Light Bill</td>
+          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Latest Light Bill</td>
+        </tr>
+        <tr>
+          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Aadhar Card Copy</td>
+          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">PAN Card</td>
+        </tr>
+        <tr>
+          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Cancelled Cheque</td>
+          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Cancelled Cheque</td>
+        </tr>
+        <tr>
+          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Passport Size Photo</td>
+          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Society Registration Letter</td>
+        </tr>
+        <tr>
+          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Property Tax Bill</td>
+          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Sammati Patrak (Consent Letter)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Terms & Conditions Section -->
+    <div style="font-size: 12px; color: #475569; line-height: 1.5;">
+      <h3 style="margin: 0 0 5px 0; font-size: 13px; font-weight: 800; color: #1e3a8a; text-transform: uppercase;">TERMS & CONDITIONS:</h3>
+      
+      <h4 style="margin: 10px 0 2px 0; font-size: 12px; font-weight: 800; color: #1e3a8a;">GST:</h4>
+      <p style="margin: 0;">Included at actual rate of 8.9%</p>
+
+      <h4 style="margin: 10px 0 2px 0; font-size: 12px; font-weight: 800; color: #1e3a8a;">COMPLETION TIMELINE:</h4>
+      <p style="margin: 0;">Work will be completed within 2 months from the date of receipt of Work Order & Procurement clearance, or receipt of advance payment (whichever is later), subject to site clearance.</p>
+
+      <h4 style="margin: 10px 0 2px 0; font-size: 12px; font-weight: 800; color: #1e3a8a;">WARRANTY:</h4>
+      <ul style="margin: 0; padding-left: 15px; list-style-type: none;">
+        <li>• Solar Modules: 30 years output warranty</li>
+        <li>• Inverter: 10 years warranty with monitoring</li>
+        <li>• Free AMC: 5 years included</li>
+      </ul>
     </div>
   `;
 
@@ -101,30 +138,69 @@ export const generateQuotationPDF = async (lead: ApiLead) => {
     });
 
     const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
+
+    // 1. Load pdf-lib
+    const { PDFDocument } = await import('pdf-lib');
+
+    // 2. Fetch the fixed PDFs
+    const res1 = await fetch('/pdf/1-4.pdf');
+    if (!res1.ok) throw new Error("Could not load /pdf/1-4.pdf");
+    const firstPdfBytes = await res1.arrayBuffer();
+    
+    // Fetch blank 5.pdf to use as background for dynamic page
+    const res5 = await fetch('/pdf/5.pdf');
+    if (!res5.ok) throw new Error("Could not load /pdf/5.pdf");
+    const fifthPdfBytes = await res5.arrayBuffer();
+
+    const res2 = await fetch('/pdf/6-9.pdf');
+    if (!res2.ok) throw new Error("Could not load /pdf/6-9.pdf");
+    const thirdPdfBytes = await res2.arrayBuffer();
+
+    const firstPdf = await PDFDocument.load(firstPdfBytes);
+    const fifthPdf = await PDFDocument.load(fifthPdfBytes);
+    const thirdPdf = await PDFDocument.load(thirdPdfBytes);
+
+    // 3. Create the final merged PDF
+    const mergedPdf = await PDFDocument.create();
+
+    // 4. Add Pages 1 to 4
+    const firstPages = await mergedPdf.copyPages(firstPdf, firstPdf.getPageIndices());
+    firstPages.forEach((page) => mergedPdf.addPage(page));
+
+    // 5. Create Dynamic Page 5 (Copy from 5.pdf and overlay the HTML)
+    const fifthPages = await mergedPdf.copyPages(fifthPdf, fifthPdf.getPageIndices());
+    const dynamicPage = fifthPages[0]; // Take the first page of 5.pdf
+    mergedPdf.addPage(dynamicPage);
+    
+    const { width, height } = dynamicPage.getSize();
+    const pngImage = await mergedPdf.embedPng(imgData);
+    const imgWidth = width;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    dynamicPage.drawImage(pngImage, {
+      x: 0,
+      y: height - imgHeight, // Draw from top
+      width: imgWidth,
+      height: imgHeight,
     });
 
-    const imgWidth = 210; // A4 standard width (mm)
-    const pageHeight = 297; // A4 standard height (mm)
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    let position = 0;
+    // 6. Add Pages 6 to 9
+    const thirdPages = await mergedPdf.copyPages(thirdPdf, thirdPdf.getPageIndices());
+    thirdPages.forEach((page) => mergedPdf.addPage(page));
 
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-
+    // 7. Serialize and trigger download
+    const pdfBytesModified = await mergedPdf.save();
+    
+    const blob = new Blob([pdfBytesModified], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
     const cleanedName = lead.fullName?.replace(/\s+/g, '_') || 'Lead';
-    pdf.save(`Quotation_${cleanedName}.pdf`);
+    link.download = `Quotation_${cleanedName}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+
   } catch (error) {
     console.error('Failed to generate PDF:', error);
     alert('Failed to download PDF. Please try again.');
