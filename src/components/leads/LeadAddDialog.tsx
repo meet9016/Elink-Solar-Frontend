@@ -60,7 +60,12 @@ export default function LeadAddDialog({
 
   const isSalesExecutive = useMemo(() => {
     const roleName = (currentUser?.role?.roleName || '').toLowerCase();
-    return roleName === 'sales executive';
+    return roleName === 'sales';
+  }, [currentUser]);
+
+  const isAdminOrHR = useMemo(() => {
+    const roleName = (currentUser?.role?.roleName || '').toLowerCase();
+    return roleName.includes('admin') || roleName.includes('hr');
   }, [currentUser]);
 
   useEffect(() => {
@@ -206,7 +211,13 @@ export default function LeadAddDialog({
             const d = depts.find((dept: any) => dept._id === u.department);
             return { ...u, departmentName: d ? (d.roleName || d.name) : '' };
           });
-          setStaff(usersWithDepts);
+         
+          const salesUsers = isAdminOrHR 
+            ? usersWithDepts 
+            : usersWithDepts.filter((u: any) => 
+                u.departmentName && u.departmentName.toLowerCase().includes('sales')
+              );
+          setStaff(salesUsers);
           leadData = leadRes.data?.data;
         } else {
           const [staffRes, deptRes] = await Promise.all([
@@ -219,7 +230,13 @@ export default function LeadAddDialog({
             const d = depts.find((dept: any) => dept._id === u.department);
             return { ...u, departmentName: d ? (d.roleName || d.name) : '' };
           });
-          setStaff(usersWithDepts);
+    
+          const salesUsers = isAdminOrHR 
+            ? usersWithDepts 
+            : usersWithDepts.filter((u: any) => 
+                u.departmentName && u.departmentName.toLowerCase().includes('sales')
+              );
+          setStaff(salesUsers);
         }
 
         if (mode === 'edit') {
