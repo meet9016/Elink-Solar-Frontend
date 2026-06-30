@@ -49,7 +49,7 @@ export const generateQuotationPDF = async (lead: ApiLead) => {
 
     <!-- Commercial Offer Section -->
     <div style="margin-bottom: 15px;">
-      <h2 style="margin: 0 0 10px 0; font-size: 20px; font-weight: 800; color: #1e3a8a; text-transform: uppercase;">COMMERCIAL OFFER:</h2>
+      <h2 style="margin: 0 0 10px 0; font-size: 20px; font-weight: 800; color: #A63C71; text-transform: uppercase;">COMMERCIAL OFFER:</h2>
       <p style="margin: 0; font-size: 14px; color: #64748b; font-weight: 500;">Price for complete solar system with 5 years free AMC.</p>
     </div>
 
@@ -57,23 +57,23 @@ export const generateQuotationPDF = async (lead: ApiLead) => {
     <table style="width: 100%; border-collapse: separate; border-spacing: 2px; text-align: center; font-size: 13px; font-weight: 700; margin-bottom: 15px;">
       <tbody>
         <tr>
-          <td style="width: 70%; background-color: #899bb4; color: #1e293b; padding: 10px; text-transform: uppercase;">SOLAR MODULE MAKE</td>
-          <td style="width: 30%; background-color: #d0d7e2; color: #1e293b; padding: 10px;">${solarModule || '-'}</td>
+          <td style="width: 70%; background-color: #A63C71; color: #ffffff; padding: 10px; text-transform: uppercase;">SOLAR MODULE MAKE</td>
+          <td style="width: 30%; background-color: #fdf5f9; color: #1e293b; padding: 10px;">${solarModule || '-'}</td>
         </tr>
         <tr>
-          <td style="background-color: #899bb4; color: #1e293b; padding: 10px; text-transform: uppercase;">INVERTER</td>
-          <td style="background-color: #d0d7e2; color: #1e293b; padding: 10px;">${inverter || '-'}</td>
+          <td style="background-color: #A63C71; color: #ffffff; padding: 10px; text-transform: uppercase;">INVERTER</td>
+          <td style="background-color: #fdf5f9; color: #1e293b; padding: 10px;">${inverter || '-'}</td>
         </tr>
         ${rows.map((row) => `
         <tr>
-          <td style="background-color: #899bb4; color: #1e293b; padding: 10px; text-transform: uppercase;">${row.title}</td>
-          <td style="background-color: #d0d7e2; color: #1e293b; padding: 10px;">${row.values[0] || row.values.join(', ') || '-'}</td>
+          <td style="background-color: #A63C71; color: #ffffff; padding: 10px; text-transform: uppercase;">${row.title}</td>
+          <td style="background-color: #fdf5f9; color: #1e293b; padding: 10px;">${row.values[0] || row.values.join(', ') || '-'}</td>
         </tr>
         `).join('')}
       </tbody>
     </table>
 
-    <p style="margin: 0 0 20px 0; font-size: 11px; color: #1e3a8a; line-height: 1.4;">
+    <p style="margin: 0 0 20px 0; font-size: 11px; color: #A63C71; line-height: 1.4;">
       <strong>Note:</strong> If you are eligible, the subsidy amount will be credited by the government to your bank account after the meter installation is completed. Please keep this in mind during your planning.
     </p>
 
@@ -81,45 +81,45 @@ export const generateQuotationPDF = async (lead: ApiLead) => {
     <table style="width: 100%; border-collapse: separate; border-spacing: 2px; text-align: center; font-size: 12px; margin-bottom: 20px; font-weight: 600; color: #1e293b;">
       <thead>
         <tr>
-          <th style="width: 50%; background-color: #899bb4; padding: 10px; text-transform: uppercase; font-weight: 700;">DOCUMENTS REQUIRED FOR INDIVIDUAL SOLAR</th>
-          <th style="width: 50%; background-color: #899bb4; padding: 10px; text-transform: uppercase; font-weight: 700;">DOCUMENTS REQUIRED FOR COMMON SOLAR</th>
+          <th style="width: 50%; background-color: #A63C71; color: #ffffff; padding: 10px; text-transform: uppercase; font-weight: 700;">DOCUMENTS REQUIRED FOR INDIVIDUAL SOLAR</th>
+          <th style="width: 50%; background-color: #A63C71; color: #ffffff; padding: 10px; text-transform: uppercase; font-weight: 700;">DOCUMENTS REQUIRED FOR COMMON SOLAR</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Latest Light Bill</td>
-          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Latest Light Bill</td>
+          <td style="background-color: #fdf5f9; border: 1px solid #f3e4ec; padding: 8px;">Latest Light Bill</td>
+          <td style="background-color: #fdf5f9; border: 1px solid #f3e4ec; padding: 8px;">Latest Light Bill</td>
         </tr>
         <tr>
-          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Aadhar Card Copy</td>
-          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">PAN Card</td>
+          <td style="background-color: #fdf5f9; border: 1px solid #f3e4ec; padding: 8px;">Aadhar Card Copy</td>
+          <td style="background-color: #fdf5f9; border: 1px solid #f3e4ec; padding: 8px;">PAN Card</td>
         </tr>
         <tr>
-          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Cancelled Cheque</td>
-          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Cancelled Cheque</td>
+          <td style="background-color: #fdf5f9; border: 1px solid #f3e4ec; padding: 8px;">Cancelled Cheque</td>
+          <td style="background-color: #fdf5f9; border: 1px solid #f3e4ec; padding: 8px;">Cancelled Cheque</td>
         </tr>
         <tr>
-          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Passport Size Photo</td>
-          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Society Registration Letter</td>
+          <td style="background-color: #fdf5f9; border: 1px solid #f3e4ec; padding: 8px;">Passport Size Photo</td>
+          <td style="background-color: #fdf5f9; border: 1px solid #f3e4ec; padding: 8px;">Society Registration Letter</td>
         </tr>
         <tr>
-          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Property Tax Bill</td>
-          <td style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px;">Sammati Patrak (Consent Letter)</td>
+          <td style="background-color: #fdf5f9; border: 1px solid #f3e4ec; padding: 8px;">Property Tax Bill</td>
+          <td style="background-color: #fdf5f9; border: 1px solid #f3e4ec; padding: 8px;">Sammati Patrak (Consent Letter)</td>
         </tr>
       </tbody>
     </table>
 
     <!-- Terms & Conditions Section -->
     <div style="font-size: 12px; color: #475569; line-height: 1.5;">
-      <h3 style="margin: 0 0 5px 0; font-size: 13px; font-weight: 800; color: #1e3a8a; text-transform: uppercase;">TERMS & CONDITIONS:</h3>
+      <h3 style="margin: 0 0 5px 0; font-size: 13px; font-weight: 800; color: #A63C71; text-transform: uppercase;">TERMS & CONDITIONS:</h3>
       
-      <h4 style="margin: 10px 0 2px 0; font-size: 12px; font-weight: 800; color: #1e3a8a;">GST:</h4>
+      <h4 style="margin: 10px 0 2px 0; font-size: 12px; font-weight: 800; color: #A63C71;">GST:</h4>
       <p style="margin: 0;">Included at actual rate of 8.9%</p>
 
-      <h4 style="margin: 10px 0 2px 0; font-size: 12px; font-weight: 800; color: #1e3a8a;">COMPLETION TIMELINE:</h4>
+      <h4 style="margin: 10px 0 2px 0; font-size: 12px; font-weight: 800; color: #A63C71;">COMPLETION TIMELINE:</h4>
       <p style="margin: 0;">Work will be completed within 45 days from the date of receipt of Work Order & Procurement clearance, or receipt of advance payment (whichever is later), subject to site clearance.</p>
 
-      <h4 style="margin: 10px 0 2px 0; font-size: 12px; font-weight: 800; color: #1e3a8a;">WARRANTY:</h4>
+      <h4 style="margin: 10px 0 2px 0; font-size: 12px; font-weight: 800; color: #A63C71;">WARRANTY:</h4>
       <ul style="margin: 0; padding-left: 15px; list-style-type: none;">
         <li>• Solar Modules: 30 years output warranty</li>
         <li>• Inverter: 10 years warranty with monitoring</li>
