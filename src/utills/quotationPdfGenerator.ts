@@ -117,13 +117,13 @@ export const generateQuotationPDF = async (lead: ApiLead) => {
       <p style="margin: 0;">Included at actual rate of 8.9%</p>
 
       <h4 style="margin: 10px 0 2px 0; font-size: 12px; font-weight: 800; color: #1e3a8a;">COMPLETION TIMELINE:</h4>
-      <p style="margin: 0;">Work will be completed within 2 months from the date of receipt of Work Order & Procurement clearance, or receipt of advance payment (whichever is later), subject to site clearance.</p>
+      <p style="margin: 0;">Work will be completed within 45 days from the date of receipt of Work Order & Procurement clearance, or receipt of advance payment (whichever is later), subject to site clearance.</p>
 
       <h4 style="margin: 10px 0 2px 0; font-size: 12px; font-weight: 800; color: #1e3a8a;">WARRANTY:</h4>
       <ul style="margin: 0; padding-left: 15px; list-style-type: none;">
         <li>• Solar Modules: 30 years output warranty</li>
         <li>• Inverter: 10 years warranty with monitoring</li>
-        <li>• Free AMC: 5 years included</li>
+        <li>• Free service warranty : 5 years included (Physical damage not applicable)</li>
       </ul>
     </div>
   `;
