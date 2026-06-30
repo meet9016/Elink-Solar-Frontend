@@ -82,6 +82,35 @@
 
   const ITEMS_PER_PAGE = 5;
 
+  const CustomDarkTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const total = payload.reduce((sum: number, entry: any) => sum + (entry.value || 0), 0);
+      return (
+        <div className="bg-slate-900 text-white p-3 rounded-lg shadow-xl border border-slate-700 min-w-[150px]">
+          <p className="font-semibold text-sm mb-2 pb-2 border-b border-slate-700">{label}</p>
+          <div className="space-y-1.5">
+            {payload.map((entry: any, index: number) => {
+              const percentage = total > 0 ? ((entry.value / total) * 100).toFixed(1) : "0.0";
+              return (
+                <div key={index} className="flex justify-between items-center text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                    <span className="text-slate-300">{entry.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2 pl-4">
+                    <span className="font-medium text-white">{entry.value}</span>
+                    {payload.length > 1 && <span className="text-slate-500 text-[10px] w-8 text-right">{percentage}%</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   export default function Dashboard() {
     const router = useRouter();
 
@@ -94,7 +123,7 @@
     >([]);
 
     const [kwGrowthData, setKwGrowthData] = useState<any>({ total: 0, chartData: [] });
-    const [kwTimeframe, setKwTimeframe] = useState<string>("month");
+    const [kwTimeframe, setKwTimeframe] = useState<string>("year");
     
     const [salesWinRateData, setSalesWinRateData] = useState<any[]>([]);
     const [salesTimeframe, setSalesTimeframe] = useState<string>("all");
@@ -845,19 +874,7 @@
                           <Cell key={`cell-${index}`} fill={entry.fill} stroke="white" strokeWidth={2} />
                         ))}
                       </Pie>
-                      <Tooltip
-                        content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
-                            return (
-                              <div className="bg-white border border-gray-100 p-3 rounded-xl shadow-xl">
-                                <p className="text-sm font-bold text-gray-900">{payload[0].name}</p>
-                                <p className="text-sm text-blue-600 font-semibold">{payload[0].value} Leads</p>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
+                      <Tooltip content={<CustomDarkTooltip />} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
@@ -905,19 +922,7 @@
                             <Cell key={`cell-${index}`} fill={entry.fill} stroke="white" strokeWidth={2} />
                           ))}
                         </Pie>
-                        <Tooltip
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              return (
-                                <div className="bg-white border border-gray-100 p-3 rounded-xl shadow-xl">
-                                  <p className="text-sm font-bold text-gray-900">{payload[0].name}</p>
-                                  <p className="text-sm text-emerald-600 font-semibold">{payload[0].value} Leads</p>
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
+                        <Tooltip content={<CustomDarkTooltip />} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -965,11 +970,8 @@
                   <BarChart data={kwGrowthData.chartData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                     <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 12}} dy={10} />
-                    <Tooltip
-                      cursor={{fill: '#F3F4F6'}}
-                      contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'}}
-                    />
-                    <Bar dataKey="kw" fill="#6366f1" radius={[6, 6, 0, 0]} maxBarSize={60} />
+                    <Tooltip content={<CustomDarkTooltip />} cursor={{fill: '#F3F4F6'}} />
+                    <Bar dataKey="kw" name="KW Growth" fill="#6366f1" radius={[6, 6, 0, 0]} maxBarSize={60} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -1003,10 +1005,7 @@
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 12}} dy={10} />
                     <YAxis axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 12}} dx={-10} />
-                    <Tooltip
-                      cursor={{fill: '#F3F4F6'}}
-                      contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'}}
-                    />
+                    <Tooltip content={<CustomDarkTooltip />} cursor={{fill: '#F3F4F6'}} />
                     <Legend iconType="circle" wrapperStyle={{paddingTop: '20px'}} />
                     <Bar dataKey="won" name="Won" fill="#10B981" radius={[4, 4, 0, 0]} barSize={20} />
                     <Bar dataKey="lost" name="Lost" fill="#EF4444" radius={[4, 4, 0, 0]} barSize={20} />

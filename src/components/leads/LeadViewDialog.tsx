@@ -555,6 +555,8 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh, cur
     return false;
   }, [lead, permissions, currentUser, isAdmin]);
 
+  const isWon = useMemo(() => lead?.leadStatus?.name?.toLowerCase() === 'won', [lead]);
+
   useEffect(() => {
     if (lead) {
       setEditStatus(lead.leadStatus?._id || '');
@@ -580,7 +582,7 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh, cur
   }, [localFollowUps, followUpSearch]);
 
   // Get current staff info and departments
-  const currentStaff = useAppSelector((state) => state.auth.currentStaff);
+  const currentStaff = useAppSelector((state: any) => state.auth.currentStaff);
   useEffect(() => {
     if (currentStaff) {
       setStaffInfo(currentStaff);
@@ -1023,12 +1025,12 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh, cur
                 {statuses.map((s) => (
                   <button
                     key={s._id}
-                    onClick={() => canUpdateLead && setEditStatus(s._id)}
-                    disabled={!canUpdateLead}
+                    onClick={() => (!isWon) && canUpdateLead && setEditStatus(s._id)}
+                    disabled={!canUpdateLead || isWon}
                     className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${editStatus === s._id
                       ? 'bg-secondary text-white shadow'
                       : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                      } ${!canUpdateLead ? 'opacity-60 cursor-not-allowed' : ''}`}
+                      } ${(!canUpdateLead || isWon) ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
                     {s.name}
                   </button>

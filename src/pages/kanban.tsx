@@ -1450,18 +1450,22 @@ export default function LeadsPage() {
                 <div className="bg-gray-50 p-4 rounded-lg md:col-span-2">
                   <div className="text-sm text-gray-600 mb-3">Status</div>
                   <div className="flex flex-wrap gap-2">
-                    {statuses.map((s) => (
-                      <button
-                        key={s._id}
-                        onClick={() => setEditingStatus(s._id)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${editingStatus === s._id
-                          ? 'bg-secondary text-white'
-                          : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                          }`}
-                      >
-                        {s.name}
-                      </button>
-                    ))}
+                    {statuses.map((s) => {
+                      const isAlreadyWon = viewLead?.leadStatus?.name?.toLowerCase() === 'won';
+                      return (
+                        <button
+                          key={s._id}
+                          onClick={() => !isAlreadyWon && setEditingStatus(s._id)}
+                          disabled={isAlreadyWon}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${editingStatus === s._id
+                            ? 'bg-secondary text-white'
+                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                            } ${isAlreadyWon ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        >
+                          {s.name}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg">

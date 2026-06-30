@@ -179,8 +179,10 @@ export default function LeadAddDialog({
     }
   }, [isOpen, mode, initialData, token]);
 
+  const isAlreadyWon = mode === 'edit' && leadStatuses.find(s => s._id === initialData?.status)?.name?.toLowerCase() === 'won';
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type } = e.target;
     if (type === 'checkbox') {
@@ -415,14 +417,15 @@ export default function LeadAddDialog({
             </div>
 
             <div>
-              <Label required>Status</Label>
-              <select
-                name="leadStatus"
-                value={formData.leadStatus}
-                onChange={handleChange}
-                required
-                className="w-full border border-slate-400 rounded px-3 py-2 text-black"
-              >
+                <Label required>Status</Label>
+                <select
+                  name="leadStatus"
+                  value={formData.leadStatus}
+                  onChange={handleChange}
+                  required
+                  disabled={isAlreadyWon}
+                  className={`w-full border border-slate-400 rounded px-3 py-2 text-black ${isAlreadyWon ? 'opacity-60 cursor-not-allowed bg-gray-100' : ''}`}
+                >
                 <option value="">— Select —</option>
                 {leadStatuses.map((item) => (
                   <option key={item._id} value={item._id}>

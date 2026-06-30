@@ -500,6 +500,7 @@ export default function LeadAddDialog({
                 options={statuses.map((s) => ({ value: s._id, label: s.name! }))}
                 error={getFieldError('leadStatus')}
                 placeholder="Select Stage"
+                disabled={mode === 'edit' && (initialData?.leadStatus?.name?.toLowerCase() === 'won' || statuses.find(s => s._id === (typeof initialData?.leadStatus === 'string' ? initialData.leadStatus : initialData?.leadStatus?._id))?.name?.toLowerCase() === 'won')}
                 required={requiredFields.includes('leadStatus')}
               />
               {!isSalesExecutive && (
