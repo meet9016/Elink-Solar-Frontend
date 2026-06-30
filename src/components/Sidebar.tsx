@@ -21,6 +21,7 @@ import {
   PackagePlus,
   PackageMinus,
   Building2,
+  Megaphone,
 } from 'lucide-react';
 import { useRouter } from "next/navigation";
 import { useAppSelector } from '@/redux/hooks';
@@ -106,6 +107,7 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
   if (canViewRole) menuItems.push({ icon: Building2, label: "Department Management", path: "/roles" });
   if (canViewStaff) menuItems.push({ icon: Users, label: "User", path: "/user-list" });
   if (canViewLeadStatus) menuItems.push({ icon: Flag, label: "Lead Status", path: "/lead-status" });
+  if (canViewLeadSource) menuItems.push({ icon: Megaphone, label: "Lead Source", path: "/lead-sources" });
   if (canViewCategory) menuItems.push({ icon: List, label: "Category", path: "/category" });
   if (canViewProduct) menuItems.push({ icon: Package, label: "Product", path: "/product" });
   if (canViewStock) {
