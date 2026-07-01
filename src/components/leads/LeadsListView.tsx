@@ -253,7 +253,7 @@ export default function LeadsListView({
       const apiLead: ApiLead = {
         _id: row.id,
         fullName: row.name,
-        contact: row.phone,
+        contact: row.contact,
         email: row.email,
       };
       onView?.(apiLead);

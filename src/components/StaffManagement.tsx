@@ -113,7 +113,7 @@ export default function SalesExecutiveForm({
         number: initialData.number || '',
         email: initialData.email || '',
         password: '',
-        department: initialData.department || [],
+        department: (initialData as any).department || [],
         city: (initialData as any).city || '',
         status: (initialData as any).status?.toLowerCase() || 'active',
       });

@@ -100,11 +100,10 @@ export function ProductContent() {
     }
   }, [catStatus, dispatch]);
 
-  const fetchData = async (signal?: AbortSignal) => {
+  const fetchData = async () => {
     try {
       const res = await axios.get(baseUrl.product, {
         headers,
-        signal,
         params: {
           search: debouncedSearch || undefined,
           page: currentPage,
@@ -140,9 +139,7 @@ export function ProductContent() {
   };
 
   useEffect(() => {
-    const controller = new AbortController();
-    fetchData(controller.signal);
-    return () => controller.abort();
+    fetchData();
   }, [debouncedSearch, currentPage, pageSize]);
 
 

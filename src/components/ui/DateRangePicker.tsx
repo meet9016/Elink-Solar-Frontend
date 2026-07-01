@@ -48,7 +48,7 @@ export default function DateRangePicker({
             <div className="relative flex items-center w-full">
               <DatePicker
                 selected={fromDateObj}
-                onChange={(date) => onFromDateChange(formatDate(date))}
+                onChange={(date: Date | null) => onFromDateChange(formatDate(date))}
                 selectsStart
                 startDate={fromDateObj}
                 endDate={toDateObj}
@@ -68,7 +68,7 @@ export default function DateRangePicker({
             <div className="relative flex items-center w-full">
               <DatePicker
                 selected={toDateObj}
-                onChange={(date) => onToDateChange(formatDate(date))}
+                onChange={(date: Date | null) => onToDateChange(formatDate(date))}
                 selectsEnd
                 startDate={fromDateObj}
                 endDate={toDateObj}
@@ -105,7 +105,7 @@ export default function DateRangePicker({
           <div className="relative flex items-center w-full">
             <DatePicker
               selected={fromDateObj}
-              onChange={(date) => onFromDateChange(formatDate(date))}
+              onChange={(date: Date | null) => onFromDateChange(formatDate(date))}
               selectsStart
               startDate={fromDateObj}
               endDate={toDateObj}
@@ -126,7 +126,7 @@ export default function DateRangePicker({
           <div className="relative flex items-center w-full">
             <DatePicker
               selected={toDateObj}
-              onChange={(date) => onToDateChange(formatDate(date))}
+              onChange={(date: Date | null) => onToDateChange(formatDate(date))}
               selectsEnd
               startDate={fromDateObj}
               endDate={toDateObj}

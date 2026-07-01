@@ -100,12 +100,11 @@ export function LeadStatusContent() {
 
   /* ================= LOAD DATA (search + pagination) ================= */
 
-  const fetchData = async (signal?: AbortSignal) => {
+  const fetchData = async () => {
     setIsLoading(true);
     try {
       const res = await axios.get(baseUrl.leadStatuses, {
         headers,
-        signal,
         params: {
           search: debouncedSearch || undefined,
           page: currentPage,
@@ -134,9 +133,7 @@ export function LeadStatusContent() {
   };
 
   useEffect(() => {
-    const controller = new AbortController();
-    fetchData(controller.signal);
-    return () => controller.abort();
+    fetchData();
   }, [debouncedSearch, currentPage, pageSize]);
 
   /* ================= SAVE (add or edit) ================= */
@@ -375,7 +372,7 @@ export function LeadStatusContent() {
             error={formik.touched.name && formik.errors.name ? formik.errors.name : undefined}
             required
             placeholder="Enter status name"
-            disabled={isSubmitting || (formik.values._id && isReserved(formik.values.originalName))}
+            disabled={Boolean(isSubmitting || (formik.values._id && isReserved(formik.values.originalName)))}
           />
           
           <FormInput

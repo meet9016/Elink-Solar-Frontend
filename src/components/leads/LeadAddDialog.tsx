@@ -425,7 +425,7 @@ export default function LeadAddDialog({
                   onChange={(val) => {
                     formik.setFieldValue('city', val);
                     if (val) {
-                      const selectedUser = staff.find((u: any) => u._id === formik.values.assignedTo);
+                      const selectedUser = staff.find((u: any) => u._id === formik.values.assignedTo) as any;
                       if (selectedUser && selectedUser.city?.toLowerCase() !== val.toLowerCase()) {
                         formik.setFieldValue('assignedTo', '');
                       }

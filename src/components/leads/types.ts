@@ -50,7 +50,7 @@ export type ApiLead = {
   phone?: string;
   note?: string;
   createdBy?: ApiUser | string;
-  leadLabel?: LeadLabel | string;
+  leadLabel?: LeadLabel[] | string[];
   leadStatus?: ApiStatus;
   assignedTo?: ApiUser;
   isActive?: boolean;

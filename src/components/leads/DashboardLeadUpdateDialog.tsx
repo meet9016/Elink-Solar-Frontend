@@ -51,7 +51,7 @@ export default function DashboardLeadUpdateDialog({ isOpen, onClose, lead, onSuc
 
   useEffect(() => {
     if (currentStaff) {
-      setStaffId(currentStaff._id);
+      setStaffId(currentStaff._id || '');
     }
   }, [currentStaff]);
 
@@ -224,7 +224,7 @@ export default function DashboardLeadUpdateDialog({ isOpen, onClose, lead, onSuc
                   <label className="text-xs font-medium text-gray-700">Next Followup Date <span className="text-red-500">*</span></label>
                   <DatePicker
                     selected={nextDate ? new Date(nextDate) : null}
-                    onChange={(date) => setNextDate(date ? date.toISOString().split('T')[0] : '')}
+                    onChange={(date: Date | null) => setNextDate(date ? date.toISOString().split('T')[0] : '')}
                     placeholderText="mm/dd/yyyy"
                     dateFormat="MM/dd/yyyy"
                     className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 transition-all outline-none cursor-pointer"

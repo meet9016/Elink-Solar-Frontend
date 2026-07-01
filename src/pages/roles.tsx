@@ -173,7 +173,7 @@ export function RolesContent() {
     setSetupPermissions(rawPerms.role || null);
   }, [currentStaff]);
 
-  const fetchRoles = useCallback(async (signal?: AbortSignal) => {
+  const fetchRoles = useCallback(async () => {
     setIsLoading(true);
     try {
       const params = {
@@ -184,7 +184,6 @@ export function RolesContent() {
 
       const res = await axios.get(baseUrl.getAllRoles, {
         params,
-        signal,
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
 
@@ -212,9 +211,7 @@ export function RolesContent() {
   }, [currentPage, pageSize, debouncedSearch, token]);
 
   useEffect(() => {
-    const controller = new AbortController();
-    fetchRoles(controller.signal);
-    return () => controller.abort();
+    fetchRoles();
   }, [fetchRoles]);
 
   const refreshAfterMutation = () => {

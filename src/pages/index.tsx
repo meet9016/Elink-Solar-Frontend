@@ -161,7 +161,7 @@
       if (!currentStaff) return;
       const staff = currentStaff;
       setUser(staff);
-      const role = staff.role || {};
+      const role = staff.role || {} as any;
       const rawPerms = Array.isArray(role.permissions) ? role.permissions[0] : role.permissions || {};
       const lp = rawPerms.lead || {};
       const sp = rawPerms.setup || {};
