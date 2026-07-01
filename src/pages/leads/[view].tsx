@@ -16,6 +16,7 @@ import LeadAddDialog from '@/components/leads/LeadAddDialog';
 import LeadViewDialog from '@/components/leads/LeadViewDialog';
 import LeadBulkImportDialog from '@/components/leads/LeadBulkImportDialog';
 import { PageSkeleton, KanbanColumnSkeleton } from '@/components/ui/Skeleton';
+import PremiumLoader from '@/components/ui/PremiumLoader';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 import {
@@ -72,14 +73,14 @@ export default function LeadsPage() {
 
   // ── Permissions ──────────────────────────────────────────────────────────
   const [leadPermissions, setLeadPermissions] = useState<{
-    create?: boolean;
-    readAll?: boolean;
-    readOwn?: boolean;
-    update?: boolean;
-    delete?: boolean;
-    assign?: boolean;
-    transfer?: boolean;
-    convert?: boolean;
+    create: boolean;
+    readAll: boolean;
+    readOwn: boolean;
+    update: boolean;
+    delete: boolean;
+    assign: boolean;
+    transfer: boolean;
+    convert: boolean;
   } | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -92,12 +93,21 @@ export default function LeadsPage() {
   useEffect(() => {
     if (currentStaff) {
       setCurrentUser(currentStaff);
-      const role = currentStaff.role || {};
+      const role = currentStaff.role || {} as any;
       const rawPerms = Array.isArray(role.permissions)
-        ? role.permissions[0]
+        ? role.permissions[0] || {}
         : role.permissions || {};
 
-      const lp = rawPerms.lead || {};
+      const lp = rawPerms.lead || {
+        create: false,
+        readAll: false,
+        readOwn: false,
+        update: false,
+        delete: false,
+        assign: false,
+        transfer: false,
+        convert: false
+      };
       setLeadPermissions(lp);
       if (!lp.readAll && lp.readOwn) setActiveTab('my');
       const roleName = (role.roleName || '').toLowerCase();
@@ -251,50 +261,9 @@ export default function LeadsPage() {
     );
   }
 
-  // ── Loading skeleton ──────────────────────────────────────────────────────
- const [initialRender, setInitialRender] = useState(true);
-  useEffect(() => {
-    if (!loading) {
-      setInitialRender(false);
-    }
-  }, [loading]);
-
-  if (loading && initialRender) {
-    return (
-      <div className="flex h-full flex-col gap-4 relative overflow-hidden">
-        <div className="rounded-md border border-gray-200 bg-white px-6 py-4 transition-all duration-300">
-          <div className="flex flex-wrap items-center gap-3">
-            <div>
-              <div className="h-8 w-24 bg-gray-200 rounded-md animate-pulse" />
-            </div>
-            <div className="flex items-center gap-3 ml-auto">
-              <div className="h-10 w-24 bg-gray-200 rounded-md animate-pulse" />
-              <div className="h-10 w-20 bg-gray-200 rounded-md animate-pulse" />
-              <div className="h-10 w-32 bg-gray-200 rounded-md animate-pulse" />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-hidden">
-          {viewMode === 'list' ? (
-            <div className="bg-white rounded-md border border-gray-200 p-4">
-              <PageSkeleton />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 h-full">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <KanbanColumnSkeleton key={i} />
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
   // ── Main render ───────────────────────────────────────────────────────────
   return (
-    <div className="flex min-h-full flex-col gap-4 relative">
+    <div className="flex min-h-[calc(100vh-100px)] flex-col gap-4 relative">
 
       {/* ── Page Header & Unified Toolbar ───────────────────────────────── */}
       <div className="rounded-md border border-gray-200 bg-white px-4 md:px-6 py-4 transition-all duration-300">
@@ -469,20 +438,27 @@ export default function LeadsPage() {
       </div>
 
       {/* ── Main Content ─────────────────────────────────────────────────── */}
-      <div className="flex-1">
-        {viewMode === 'list' ? (
-          <LeadsListView
-            statuses={statuses}
-            sources={sources}
-            staffMembers={staffMembers}
-            onEdit={handleEdit}
-            onView={handleView}
-            onRefresh={refetchAll}
-            permissions={leadPermissions || {}}
-            scope={activeTab}
-            filters={filters}
-            externalLeads={leadsList}
-            loading={loading}
+      <div className="flex-1 relative min-h-[400px]">
+        {/* Main Loader Overlay - Premium UI, Full Screen */}
+        {loading && <PremiumLoader text="Loading Leads" isFullScreen={true} />}
+
+        {/* Content Wrapper - Instantly toggles visibility synchronously with loading state */}
+        <div className={`h-full ${loading ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+          {viewMode === 'list' ? (
+            <LeadsListView
+              statuses={statuses}
+              sources={sources}
+              staffMembers={staffMembers}
+              onEdit={handleEdit}
+              onView={handleView}
+              onRefresh={refetchAll}
+              permissions={leadPermissions || {
+                create: false, readAll: false, readOwn: false, update: false, delete: false, assign: false, transfer: false, convert: false
+              }}
+              scope={activeTab}
+              filters={filters}
+              externalLeads={leadsList}
+              loading={false}
             pagination={listPagination}
             onSearch={(val) => setSearch(val)}
             currentUser={currentUser}
@@ -520,6 +496,7 @@ export default function LeadsPage() {
             }}
           />
         )}
+        </div>
       </div>
 
       {/* ── Add / Edit Dialog ────────────────────────────────────────────── */}

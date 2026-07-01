@@ -332,26 +332,31 @@ export function useLeadsData(
   // 2. Unified load & Re-fetch when viewMode / activeTab / filters / pagination change
   const prevKey = useRef('');
   const prevFiltersKey = useRef('');
+  const isFirstLoad = useRef(true);
   
   useEffect(() => {
     const filtersKey = JSON.stringify({ viewMode, activeTab, filters });
     let pageResetNeeded = false;
+    let currentListPage = listPage;
+    let currentLostPage = lostPage;
+    let currentWonPage = wonPage;
     
     if (filtersKey !== prevFiltersKey.current) {
       prevFiltersKey.current = filtersKey;
       if (listPage !== 1 || lostPage !== 1 || wonPage !== 1) {
+        currentListPage = 1;
+        currentLostPage = 1;
+        currentWonPage = 1;
         setListPage(1);
         setLostPage(1);
         setWonPage(1);
-        pageResetNeeded = true;
       }
     }
 
-    if (pageResetNeeded) return; // Exit early, the state updates will trigger an immediate re-render
-
-    const key = JSON.stringify({ viewMode, activeTab, filters, kanbanSubView, listPage, lostPage, wonPage });
-    if (key === prevKey.current) return;
+    const key = JSON.stringify({ viewMode, activeTab, filters, kanbanSubView, listPage: currentListPage, lostPage: currentLostPage, wonPage: currentWonPage });
+    if (key === prevKey.current && !isFirstLoad.current) return;
     
+    isFirstLoad.current = false;
     const prevParsed = prevKey.current ? JSON.parse(prevKey.current) : null;
     prevKey.current = key;
 
@@ -370,27 +375,27 @@ export function useLeadsData(
       }
 
       if (viewMode === 'list') {
-        const listPageChanged = !prevParsed || prevParsed.listPage !== listPage;
+        const listPageChanged = !prevParsed || prevParsed.listPage !== currentListPage;
         if (filtersChanged || viewModeChanged || listPageChanged) {
-          calls.push(fetchLeadsList(activeTab, filters, listPage, signal));
+          calls.push(fetchLeadsList(activeTab, filters, currentListPage, signal));
         }
       } else {
-        const lostPageChanged = !prevParsed || prevParsed.lostPage !== lostPage;
-        const wonPageChanged = !prevParsed || prevParsed.wonPage !== wonPage;
+        const lostPageChanged = !prevParsed || prevParsed.lostPage !== currentLostPage;
+        const wonPageChanged = !prevParsed || prevParsed.wonPage !== currentWonPage;
         const kanbanSubViewChanged = !prevParsed || prevParsed.kanbanSubView !== kanbanSubView;
         
         if (filtersChanged || viewModeChanged || kanbanSubViewChanged) {
           if (kanbanSubView === 'board') {
             calls.push(fetchKanbanLeads(activeTab, filters, signal));
           } else if (kanbanSubView === 'lost') {
-            calls.push(fetchLostLeads(activeTab, filters, lostPage, signal));
+            calls.push(fetchLostLeads(activeTab, filters, currentLostPage, signal));
           } else if (kanbanSubView === 'won') {
-            calls.push(fetchWonLeads(activeTab, filters, wonPage, signal));
+            calls.push(fetchWonLeads(activeTab, filters, currentWonPage, signal));
           }
         } else {
           // Pagination changes for lost/won while staying on the same subview
-          if (kanbanSubView === 'lost' && lostPageChanged) calls.push(fetchLostLeads(activeTab, filters, lostPage, signal));
-          if (kanbanSubView === 'won' && wonPageChanged) calls.push(fetchWonLeads(activeTab, filters, wonPage, signal));
+          if (kanbanSubView === 'lost' && lostPageChanged) calls.push(fetchLostLeads(activeTab, filters, currentLostPage, signal));
+          if (kanbanSubView === 'won' && wonPageChanged) calls.push(fetchWonLeads(activeTab, filters, currentWonPage, signal));
         }
       }
       

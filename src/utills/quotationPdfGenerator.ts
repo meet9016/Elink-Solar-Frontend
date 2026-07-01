@@ -2,10 +2,25 @@ import { ApiLead } from '@/components/leads/types';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-export const generateQuotationPDF = async (lead: ApiLead) => {
-  if (!lead.quotation) return;
+interface GenerateQuotationParams {
+  quotation: {
+    date: string;
+    solarModule: string;
+    inverter: string;
+    options: string[];
+    rows: {
+      title: string;
+      values: string[];
+    }[];
+  };
+  fullName?: string;
+}
 
-  const { date, solarModule, inverter, options = [], rows = [] } = lead.quotation;
+export const generateQuotationPDF = async (params: GenerateQuotationParams) => {
+  const { fullName, quotation } = params;
+  if (!quotation) return;
+
+  const { date, solarModule, inverter, options = [], rows = [] } = quotation;
 
   const formattedDate = date ? new Date(date).toLocaleString('en-GB', {
     day: '2-digit',
@@ -194,7 +209,7 @@ export const generateQuotationPDF = async (lead: ApiLead) => {
     const blob = new Blob([pdfBytesModified], { type: 'application/pdf' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    const cleanedName = lead.fullName?.replace(/\s+/g, '_') || 'Lead';
+    const cleanedName = fullName?.replace(/\s+/g, '_') || 'Lead';
     link.download = `Quotation_${cleanedName}.pdf`;
     document.body.appendChild(link);
     link.click();
