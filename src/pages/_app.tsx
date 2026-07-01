@@ -16,6 +16,7 @@ import { useRouter } from "next/router";
 import { fetchCurrentStaff } from "@/redux/slices/authSlice";
 import { fetchLeadStatuses } from "@/redux/slices/leadStatusSlice";
 import { fetchLeadLabels } from "@/redux/slices/leadLabelSlice";
+import PremiumLoader from "@/components/ui/PremiumLoader";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -92,18 +93,7 @@ function AppContent({ Component, pageProps }: AppProps) {
               <Header toggleSidebar={() => dispatch(toggleSidebar())} />
             ) : null}
             <div className={isLoginPage ? "p-0" : "p-4 md:p-6 relative min-h-[calc(100vh-80px)]"}>
-              {isNavigating && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/70 backdrop-blur-sm">
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="relative flex h-16 w-16 items-center justify-center">
-                      <div className="absolute h-16 w-16 animate-ping rounded-full bg-primary opacity-20"></div>
-                      <div className="absolute h-12 w-12 animate-spin rounded-full border-4 border-[#e9d8f4] border-t-primary shadow-sm"></div>
-                      <div className="h-6 w-6 animate-pulse rounded-full bg-primary shadow-md"></div>
-                    </div>
-                    <p className="text-xs font-bold tracking-widest text-primary animate-pulse uppercase">Loading...</p>
-                  </div>
-                </div>
-              )}
+              {isNavigating && <PremiumLoader text="Loading" isFullScreen={true} />}
               <Component {...pageProps} />
             </div>
           </main>

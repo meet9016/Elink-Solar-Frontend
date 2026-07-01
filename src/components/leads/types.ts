@@ -45,6 +45,12 @@ export type ApiLead = {
   projecttype?: string;
   address?: string;
   locationLink?: string;
+  companyName?: string;
+  priority?: string;
+  phone?: string;
+  note?: string;
+  createdBy?: ApiUser | string;
+  leadLabel?: LeadLabel | string;
   leadStatus?: ApiStatus;
   assignedTo?: ApiUser;
   isActive?: boolean;
