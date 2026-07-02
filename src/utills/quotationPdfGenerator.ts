@@ -147,7 +147,7 @@ export const generateQuotationPDF = async (params: GenerateQuotationParams) => {
 
   try {
     const canvas = await html2canvas(container, {
-      scale: 2, // high quality
+      scale: 1.5, // optimal balance of quality and speed
       useCORS: true,
       logging: false
     });
@@ -157,23 +157,28 @@ export const generateQuotationPDF = async (params: GenerateQuotationParams) => {
     // 1. Load pdf-lib
     const { PDFDocument } = await import('pdf-lib');
 
-    // 2. Fetch the fixed PDFs
-    const res1 = await fetch('/pdf/1-4.pdf');
+    // 2. Fetch the fixed PDFs in parallel to speed up download
+    const [res1, res5, res2] = await Promise.all([
+      fetch('/pdf/1-4.pdf'),
+      fetch('/pdf/5.pdf'),
+      fetch('/pdf/6-9.pdf')
+    ]);
+
     if (!res1.ok) throw new Error("Could not load /pdf/1-4.pdf");
-    const firstPdfBytes = await res1.arrayBuffer();
-    
-    // Fetch blank 5.pdf to use as background for dynamic page
-    const res5 = await fetch('/pdf/5.pdf');
     if (!res5.ok) throw new Error("Could not load /pdf/5.pdf");
-    const fifthPdfBytes = await res5.arrayBuffer();
-
-    const res2 = await fetch('/pdf/6-9.pdf');
     if (!res2.ok) throw new Error("Could not load /pdf/6-9.pdf");
-    const thirdPdfBytes = await res2.arrayBuffer();
 
-    const firstPdf = await PDFDocument.load(firstPdfBytes);
-    const fifthPdf = await PDFDocument.load(fifthPdfBytes);
-    const thirdPdf = await PDFDocument.load(thirdPdfBytes);
+    const [firstPdfBytes, fifthPdfBytes, thirdPdfBytes] = await Promise.all([
+      res1.arrayBuffer(),
+      res5.arrayBuffer(),
+      res2.arrayBuffer()
+    ]);
+
+    const [firstPdf, fifthPdf, thirdPdf] = await Promise.all([
+      PDFDocument.load(firstPdfBytes),
+      PDFDocument.load(fifthPdfBytes),
+      PDFDocument.load(thirdPdfBytes)
+    ]);
 
     // 3. Create the final merged PDF
     const mergedPdf = await PDFDocument.create();

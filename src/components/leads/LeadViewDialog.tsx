@@ -825,6 +825,7 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh, cur
 
   const handleDeleteQuotation = async (indexToDelete: number) => {
     if (!lead) return;
+    const quotation = localQuotations[indexToDelete];
     const result = await Swal.fire({
       title: 'Delete Quotation?',
       text: 'Are you sure you want to delete this quotation?',
@@ -839,17 +840,48 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh, cur
     if (!result.isConfirmed) return;
 
     try {
+      if (quotation._id) {
+        await axios.delete(
+          `${baseUrl.updateLead}/${lead._id}/quotation/${quotation._id}`,
+          { headers: { Authorization: `Bearer ${getAuthToken()}` } }
+        );
+      } else {
+        const updatedQuotations = (localQuotations || []).filter((_, i) => i !== indexToDelete);
+        await axios.put(
+          `${baseUrl.updateLead}/${lead._id}`,
+          { quotations: updatedQuotations },
+          { headers: { Authorization: `Bearer ${getAuthToken()}` } }
+        );
+      }
+      
       const updatedQuotations = (localQuotations || []).filter((_, i) => i !== indexToDelete);
-      await axios.put(
-        `${baseUrl.updateLead}/${lead._id}`,
-        { quotations: updatedQuotations },
-        { headers: { Authorization: `Bearer ${getAuthToken()}` } }
-      );
       setLocalQuotations(updatedQuotations);
       toast.success('Quotation deleted successfully');
       onRefresh();
     } catch (e: any) {
       toast.error(e?.response?.data?.message || 'Failed to delete quotation');
+    }
+  };
+
+  const handleDownloadQuotation = async (index: number) => {
+    if (!lead) return;
+    const quotation = localQuotations[index];
+    
+    const toastId = toast.loading('Preparing PDF for download...');
+    try {
+      let qData = quotation;
+      if (quotation._id) {
+        const res = await axios.get(
+          `${baseUrl.updateLead}/${lead._id}/quotation/${quotation._id}`,
+          { headers: { Authorization: `Bearer ${getAuthToken()}` } }
+        );
+        qData = res.data?.data || quotation;
+      }
+      
+      await generateQuotationPDF({ ...lead, quotation: qData });
+      toast.update(toastId, { render: 'PDF Downloaded successfully!', type: 'success', isLoading: false, autoClose: 3000 });
+    } catch (e: any) {
+      toast.update(toastId, { render: 'Failed to download quotation', type: 'error', isLoading: false, autoClose: 3000 });
     }
   };
 
@@ -1392,7 +1424,7 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh, cur
                             <div className="inline-flex gap-2">
                               <button
                                 type="button"
-                                onClick={() => generateQuotationPDF({ ...lead, quotation: q })}
+                                onClick={() => handleDownloadQuotation(idx)}
                                 className="p-1 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                                 title="Download PDF"
                               >
