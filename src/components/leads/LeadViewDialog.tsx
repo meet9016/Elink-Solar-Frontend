@@ -1056,7 +1056,7 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh, cur
                       <label className="text-xs font-medium text-gray-500">Date</label>
                       <DatePicker
                         selected={editNextDate ? new Date(editNextDate) : null}
-                        onChange={(date) => setEditNextDate(date ? date.toISOString().split('T')[0] : '')}
+                        onChange={(date: Date | null) => setEditNextDate(date ? date.toISOString().split('T')[0] : '')}
                         placeholderText="mm/dd/yyyy"
                         dateFormat="MM/dd/yyyy"
                         className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-1 focus:ring-secondary transition-all outline-none cursor-pointer"
@@ -1202,7 +1202,7 @@ export default function LeadViewDialog({ lead, statuses, onClose, onRefresh, cur
               <div className="rounded-lg bg-gray-50 p-4">
                 <div className="mb-2 text-sm font-medium text-gray-600">Labels</div>
                 <div className="flex flex-wrap gap-2">
-                  {lead.leadLabel.map((l) => (
+                  {Array.isArray(lead.leadLabel) && lead.leadLabel.map((l: any) => (
                     <span
                       key={l._id}
                       style={{ backgroundColor: l.color }}

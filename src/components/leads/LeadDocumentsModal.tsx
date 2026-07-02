@@ -95,7 +95,7 @@ export default function LeadDocumentsModal({ isOpen, onClose, lead }: LeadDocume
     const getFileUrl = (path: string) => {
         if (!path) return '';
         if (path.startsWith('http')) return path;
-        const baseUrlWithoutApi = baseUrl.login.replace('/api/v1/user/login', '');
+        const baseUrlWithoutApi = baseUrl.userLogin.replace('/api/v1/user/login', '');
         return `${baseUrlWithoutApi}/${path.replace(/\\/g, '/')}`;
     };
 

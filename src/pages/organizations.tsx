@@ -74,7 +74,7 @@ export function OrganizationsContent() {
 
   useEffect(() => {
     if (currentStaff) {
-      const role = currentStaff?.role || {};
+      const role = currentStaff?.role || {} as any;
       const rawPerms = Array.isArray(role.organizations)
         ? role.organizations[0]
         : role.organizations || {};

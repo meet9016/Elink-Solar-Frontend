@@ -10,7 +10,8 @@ import { baseUrl, getAuthToken } from '@/config';
 
 // ── Sub-components ──────────────────────────────────────────────────────────
 import LeadsListView from '@/components/leads/LeadsListView';
-import { useAppSelector } from '@/redux/hooks';
+import { useAppSelector, useAppDispatch } from '@/redux/hooks';
+import { setGlobalLoading } from '@/redux/slices/appSlice';
 import LeadsKanbanView from '@/components/leads/LeadsKanbanView';
 import LeadAddDialog from '@/components/leads/LeadAddDialog';
 import LeadViewDialog from '@/components/leads/LeadViewDialog';
@@ -44,6 +45,7 @@ function useDebounce<T>(value: T, delay = 500): T {
 
 export default function LeadsPage() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const { view: viewParam } = router.query;
 
   // ── Active view (list | kanban) ──────────────────────────────────────────
@@ -147,6 +149,14 @@ export default function LeadsPage() {
     wonPagination,
   } = useLeadsData(activeTab, filters, viewMode, kanbanSubView);
 
+  // ── Sync Global Loading ───────────────────────────────────────────────────
+  useEffect(() => {
+    dispatch(setGlobalLoading(loading));
+    return () => {
+      dispatch(setGlobalLoading(false));
+    };
+  }, [loading, dispatch]);
+
   // ── Sync URL → state ─────────────────────────────────────────────────────
   useEffect(() => {
     if (viewParam === 'kanban' || viewParam === 'list') {
@@ -195,7 +205,6 @@ export default function LeadsPage() {
       const params: Record<string, string> = {};
       if (filters.search) params.search = filters.search;
       if (filters.status) params.status = filters.status;
-      if (filters.source) params.source = filters.source;
       if (filters.staff) params.staff = filters.staff;
       if (filters.from) params.from = filters.from;
       if (filters.to) params.to = filters.to;
@@ -439,9 +448,6 @@ export default function LeadsPage() {
 
       {/* ── Main Content ─────────────────────────────────────────────────── */}
       <div className="flex-1 relative min-h-[400px]">
-        {/* Main Loader Overlay - Premium UI, Full Screen */}
-        {loading && <PremiumLoader text="Loading Leads" isFullScreen={true} />}
-
         {/* Content Wrapper - Instantly toggles visibility synchronously with loading state */}
         <div className={`h-full ${loading ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
           {viewMode === 'list' ? (

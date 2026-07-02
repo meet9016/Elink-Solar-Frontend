@@ -617,7 +617,7 @@ export default function ProjectDetailDrawer({ isOpen, lead, onClose, onSaved }: 
                                 hdgiPipeMake: hdgiPipeMake || prev.hdgiPipeMake,
                                 projectAmount: projectAmount || prev.projectAmount,
                               }));
-                              toast.success(`Project details populated from ${lead.quotations[qIdx].options?.[optIdx] || `Option ${optIdx + 1}`}!`);
+                              toast.success(`Project details populated from ${lead.quotations?.[qIdx]?.options?.[optIdx] || `Option ${optIdx + 1}`}!`);
                             }
                           }}
                           placeholder="Choose option..."

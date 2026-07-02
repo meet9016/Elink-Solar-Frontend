@@ -106,9 +106,9 @@ export function StockOutContent() {
     }
   }, [catStatus, prodStatus, dispatch]);
 
-  const fetchData = async (signal?: AbortSignal) => {
+  const fetchData = async () => {
     try {
-      const res = await axios.get(`${baseUrl.stock}?type=OUT`, { headers, signal });
+      const res = await axios.get(`${baseUrl.stock}?type=OUT`, { headers });
       const data = (res.data?.data as any[]) ?? [];
       const items: TransactionType[] = data.map((i) => ({
         _id: i._id,
@@ -140,9 +140,7 @@ export function StockOutContent() {
 
 
   useEffect(() => {
-    const controller = new AbortController();
-    fetchData(controller.signal);
-    return () => controller.abort();
+    fetchData();
   }, [debouncedSearch, currentPage, pageSize]);
 
   const saveTransaction = async (values: any) => {

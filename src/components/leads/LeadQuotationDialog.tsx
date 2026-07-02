@@ -129,7 +129,7 @@ export default function LeadQuotationDialog({ isOpen, onClose, lead, onRefresh, 
         inverter,
         options,
         rows,
-        createdAt: oldQuotation?.createdAt || new Date().toISOString()
+        createdAt: (oldQuotation as any)?.createdAt || new Date().toISOString()
       };
 
       const currentQuotations = Array.isArray(lead.quotations) ? [...lead.quotations] : [];
@@ -138,17 +138,14 @@ export default function LeadQuotationDialog({ isOpen, onClose, lead, onRefresh, 
       } else {
         currentQuotations.push(newQuotation);
       }
-
       const payload = {
         quotations: currentQuotations
       };
-
       await axios.put(
         `${baseUrl.updateLead}/${lead._id}`,
         payload,
         { headers: { Authorization: `Bearer ${getAuthToken()}` } }
       );
-      
       toast.success(editIndex !== null && editIndex !== undefined ? 'Quotation updated successfully' : 'Quotation saved successfully');
       onRefresh();
       onClose();

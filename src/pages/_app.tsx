@@ -26,6 +26,7 @@ const poppins = Poppins({
 
 function AppContent({ Component, pageProps }: AppProps) {
   const isSidebarOpen = useAppSelector((state) => state.app.isSidebarOpen);
+  const globalLoading = useAppSelector((state) => state.app.globalLoading);
   const dispatch = useAppDispatch();
   const router = useRouter();
   const pathName = usePathname();
@@ -93,7 +94,7 @@ function AppContent({ Component, pageProps }: AppProps) {
               <Header toggleSidebar={() => dispatch(toggleSidebar())} />
             ) : null}
             <div className={isLoginPage ? "p-0" : "p-4 md:p-6 relative min-h-[calc(100vh-80px)]"}>
-              {isNavigating && <PremiumLoader text="Loading" isFullScreen={true} />}
+              {(isNavigating || globalLoading) && <PremiumLoader text="Loading" isFullScreen={true} />}
               <Component {...pageProps} />
             </div>
           </main>
@@ -114,10 +115,10 @@ function AppContent({ Component, pageProps }: AppProps) {
   );
 }
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps, router }: AppProps) {
   return (
     <Provider store={store}>
-      <AppContent Component={Component} pageProps={pageProps} />
+      <AppContent Component={Component} pageProps={pageProps} router={router} />
     </Provider>
   );
 }

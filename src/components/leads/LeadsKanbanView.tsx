@@ -153,7 +153,6 @@ export default function LeadsKanbanView({
                         search: filters.search || undefined,
                         source: filters.source || undefined,
                         staff: filters.staff || undefined,
-                        date: filters.date || undefined,
                         from: filters.from || undefined,
                         to: filters.to || undefined,
                     },
@@ -619,7 +618,7 @@ export default function LeadsKanbanView({
                                 </label>
                                 <DatePicker
                                     selected={lostModalData.date ? new Date(lostModalData.date) : null}
-                                    onChange={(date) => setLostModalData(p => ({ ...p, date: date ? date.toISOString().split('T')[0] : '' }))}
+                                    onChange={(date: Date | null) => setLostModalData(p => ({ ...p, date: date ? date.toISOString().split('T')[0] : '' }))}
                                     placeholderText="dd-mm-yyyy"
                                     dateFormat="dd-MM-yyyy"
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#A63C71] focus:border-[#A63C71]"

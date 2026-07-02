@@ -77,14 +77,13 @@ export function UserContent() {
   }, [currentStaff]);
 
 
-  const fetchStaff = useCallback(async (signal?: AbortSignal) => {
+  const fetchStaff = useCallback(async () => {
     setIsLoading(true);
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
       const [res, deptRes] = await Promise.all([
-        axios.get(baseUrl.getAllUsers, {
+          axios.get(baseUrl.getAllUsers, {
           headers,
-          signal,
           params: {
             page,
             limit,
@@ -92,7 +91,7 @@ export function UserContent() {
           },
         }),
         departments.length === 0
-          ? axios.get(baseUrl.department, { headers, signal })
+          ? axios.get(baseUrl.department, { headers })
           : Promise.resolve({ data: { data: departments } })
       ]);
 
@@ -149,9 +148,7 @@ export function UserContent() {
   }, [page, limit, debouncedSearch, token]);
 
   useEffect(() => {
-    const controller = new AbortController();
-    fetchStaff(controller.signal);
-    return () => controller.abort();
+    fetchStaff();
   }, [fetchStaff]);
 
   const togglePasswordVisibility = (id: string) => {

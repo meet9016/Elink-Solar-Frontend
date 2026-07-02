@@ -206,7 +206,7 @@ export const generateQuotationPDF = async (params: GenerateQuotationParams) => {
     // 7. Serialize and trigger download
     const pdfBytesModified = await mergedPdf.save();
     
-    const blob = new Blob([pdfBytesModified], { type: 'application/pdf' });
+    const blob = new Blob([pdfBytesModified as any], { type: 'application/pdf' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     const cleanedName = fullName?.replace(/\s+/g, '_') || 'Lead';

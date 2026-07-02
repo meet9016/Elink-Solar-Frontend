@@ -85,7 +85,7 @@ export function CategoryContent() {
     }
   }, [reduxStatus, dispatch]);
 
-  const fetchData = async (signal?: AbortSignal) => {
+  const fetchData = async () => {
     try {
       const res = await axios.get(baseUrl.category, {
         headers,
@@ -94,7 +94,6 @@ export function CategoryContent() {
           page: currentPage,
           limit: pageSize,
         },
-        signal,
       });
       const data = (res.data?.data as any[]) ?? [];
       const pagination = res.data?.pagination || {};
@@ -114,9 +113,7 @@ export function CategoryContent() {
   };
 
   useEffect(() => {
-    const controller = new AbortController();
-    fetchData(controller.signal);
-    return () => controller.abort();
+    fetchData();
   }, [debouncedSearch, currentPage, pageSize]);
 
   /* ================= SAVE (ADD / EDIT) ================= */

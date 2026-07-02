@@ -92,8 +92,7 @@ export function useLeadsData(
 
   const fetchKanbanLeads = useCallback(async (
     tab = stateRef.current.activeTab,
-    f: Filters = stateRef.current.filters,
-    signal?: AbortSignal
+    f: Filters = stateRef.current.filters
   ) => {
     try {
       const useKanbanEndpoint = !!baseUrl.getKanbanData;
@@ -110,8 +109,7 @@ export function useLeadsData(
             from: f.from || undefined,
             to: f.to || undefined,
             limit: LIMIT,
-          },
-          signal,
+          }
         });
 
         const data = res.data?.data;
@@ -137,13 +135,11 @@ export function useLeadsData(
             from: f.from || undefined,
             to: f.to || undefined,
             limit: 100,
-          },
-          signal,
+          }
         });
         setLeads(res.data?.data || []);
       }
     } catch (e) {
-      if (axios.isCancel(e)) return;
       console.error('fetchKanbanLeads error:', e);
       setLeads([]);
     }
@@ -152,8 +148,7 @@ export function useLeadsData(
   const fetchLeadsList = useCallback(async (
     tab = stateRef.current.activeTab,
     f: Filters = stateRef.current.filters,
-    page = stateRef.current.listPage,
-    signal?: AbortSignal
+    page = stateRef.current.listPage
   ) => {
     try {
       const url = tab === 'my' ? baseUrl.myLeads : baseUrl.getAllLeads;
@@ -168,8 +163,7 @@ export function useLeadsData(
           to: f.to || undefined,
           page,
           limit: LIMIT,
-        },
-        signal,
+        }
       });
       const arr = res.data?.data || [];
       const p = res.data?.pagination || {};
@@ -177,7 +171,6 @@ export function useLeadsData(
       setListTotalItems(p.totalRecords ?? p.total ?? p.count ?? arr.length);
       setListTotalPages(p.totalPages ?? (p.totalRecords ? Math.ceil(p.totalRecords / LIMIT) : 1));
     } catch (e) {
-      if (axios.isCancel(e)) return;
       console.error('fetchLeadsList error:', e);
       setLeadsList([]);
     }
@@ -186,8 +179,7 @@ export function useLeadsData(
   const fetchLostLeads = useCallback(async (
     tab = stateRef.current.activeTab,
     f: Filters = stateRef.current.filters,
-    page = stateRef.current.lostPage,
-    signal?: AbortSignal
+    page = stateRef.current.lostPage
   ) => {
     try {
       const res = await axios.get(baseUrl.getLostLeads, {
@@ -202,8 +194,7 @@ export function useLeadsData(
           to: f.to || undefined,
           page,
           limit: LIMIT,
-        },
-        signal,
+        }
       });
       const raw = res.data?.data;
       const arr: ApiLead[] = Array.isArray(raw) ? raw : (raw?.data || []);
@@ -212,7 +203,6 @@ export function useLeadsData(
       setLostTotalItems(p.totalRecords ?? p.total ?? p.count ?? arr.length);
       setLostTotalPages(p.totalPages ?? (p.totalRecords ? Math.ceil(p.totalRecords / LIMIT) : 1));
     } catch (e) {
-      if (axios.isCancel(e)) return;
       console.error('fetchLostLeads error:', e);
       setLostLeads([]);
     }
@@ -221,8 +211,7 @@ export function useLeadsData(
   const fetchWonLeads = useCallback(async (
     tab = stateRef.current.activeTab,
     f: Filters = stateRef.current.filters,
-    page = stateRef.current.wonPage,
-    signal?: AbortSignal
+    page = stateRef.current.wonPage
   ) => {
     try {
       const res = await axios.get(baseUrl.getWonLeads, {
@@ -237,8 +226,7 @@ export function useLeadsData(
           to: f.to || undefined,
           page,
           limit: LIMIT,
-        },
-        signal,
+        }
       });
       const raw = res.data?.data;
       const arr: ApiLead[] = Array.isArray(raw) ? raw : (raw?.data || []);
@@ -247,7 +235,6 @@ export function useLeadsData(
       setWonTotalItems(p.totalRecords ?? p.total ?? p.count ?? arr.length);
       setWonTotalPages(p.totalPages ?? (p.totalRecords ? Math.ceil(p.totalRecords / LIMIT) : 1));
     } catch (e) {
-      if (axios.isCancel(e)) return;
       console.error('fetchWonLeads error:', e);
       setWonLeads([]);
     }
@@ -287,10 +274,10 @@ export function useLeadsData(
           setStaffMembers([
             {
               _id: currentStaff._id,
-              fullName: currentStaff.fullName,
-              email: currentStaff.email,
-              phone: currentStaff.phone,
-              status: currentStaff.status,
+              fullName: (currentStaff as any).fullName,
+              email: (currentStaff as any).email,
+              phone: (currentStaff as any).phone,
+              status: (currentStaff as any).status,
             } as any
           ]);
         } else {
@@ -360,9 +347,6 @@ export function useLeadsData(
     const prevParsed = prevKey.current ? JSON.parse(prevKey.current) : null;
     prevKey.current = key;
 
-    const controller = new AbortController();
-    const signal = controller.signal;
-
     const load = async () => {
       setLoading(true);
       const calls: Promise<void>[] = [];
@@ -377,7 +361,7 @@ export function useLeadsData(
       if (viewMode === 'list') {
         const listPageChanged = !prevParsed || prevParsed.listPage !== currentListPage;
         if (filtersChanged || viewModeChanged || listPageChanged) {
-          calls.push(fetchLeadsList(activeTab, filters, currentListPage, signal));
+          calls.push(fetchLeadsList(activeTab, filters, currentListPage));
         }
       } else {
         const lostPageChanged = !prevParsed || prevParsed.lostPage !== currentLostPage;
@@ -386,16 +370,16 @@ export function useLeadsData(
         
         if (filtersChanged || viewModeChanged || kanbanSubViewChanged) {
           if (kanbanSubView === 'board') {
-            calls.push(fetchKanbanLeads(activeTab, filters, signal));
+            calls.push(fetchKanbanLeads(activeTab, filters));
           } else if (kanbanSubView === 'lost') {
-            calls.push(fetchLostLeads(activeTab, filters, currentLostPage, signal));
+            calls.push(fetchLostLeads(activeTab, filters, currentLostPage));
           } else if (kanbanSubView === 'won') {
-            calls.push(fetchWonLeads(activeTab, filters, currentWonPage, signal));
+            calls.push(fetchWonLeads(activeTab, filters, currentWonPage));
           }
         } else {
           // Pagination changes for lost/won while staying on the same subview
-          if (kanbanSubView === 'lost' && lostPageChanged) calls.push(fetchLostLeads(activeTab, filters, currentLostPage, signal));
-          if (kanbanSubView === 'won' && wonPageChanged) calls.push(fetchWonLeads(activeTab, filters, currentWonPage, signal));
+          if (kanbanSubView === 'lost' && lostPageChanged) calls.push(fetchLostLeads(activeTab, filters, currentLostPage));
+          if (kanbanSubView === 'won' && wonPageChanged) calls.push(fetchWonLeads(activeTab, filters, currentWonPage));
         }
       }
       
@@ -403,11 +387,10 @@ export function useLeadsData(
         await Promise.all(calls);
       }
       
-      if (!signal.aborted) setLoading(false);
+      setLoading(false);
     };
     
     load();
-    return () => { controller.abort(); };
   }, [viewMode, activeTab, filters, kanbanSubView, listPage, lostPage, wonPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ─────────────────────────────────────────────────────────────────────────
